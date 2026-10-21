@@ -1,0 +1,17 @@
+# Lints estrictos: very_good_analysis activa ~200 reglas y los modos
+# estrictos del analizador (strict-casts, strict-inference, strict-raw-types).
+include: package:very_good_analysis/analysis_options.yaml
+
+analyzer:
+  exclude:
+    - build/**
+    - "**/*.g.dart"
+    - "**/*.freezed.dart"
+    - android/**
+    - ios/**
+
+linter:
+  rules:
+    # Es una app, no un paquete publicado: documentar cada miembro público
+    # genera ruido sin aportar valor.
+    public_member_api_docs: false
