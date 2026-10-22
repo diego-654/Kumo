@@ -1,6 +1,6 @@
 name: kumo
 description: "Kumo: mapa de calor emocional de lugares."
-publish_to: 'none'
+publish_to: "none"
 
 version: 1.0.0+1
 
@@ -8,7 +8,7 @@ environment:
   sdk: ^3.13.5
 
 dependencies:
-  cupertino_icons: ^1.0.8
+  cupertino_icons: ^2.0.0
   flutter:
     sdk: flutter
   flutter_riverpod: ^3.4.3
