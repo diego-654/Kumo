@@ -5,7 +5,7 @@ import 'package:kumo/features/moments/domain/entities/moment.dart';
 void main() {
   group(InMemoryMomentsRepository, () {
     test('devuelve los momentos del más reciente al más antiguo', () async {
-      final repository = InMemoryMomentsRepository();
+      final repository = InMemoryMomentsRepository(seed: []);
       final older = Moment(
         id: '1',
         placeName: 'Café Central',
