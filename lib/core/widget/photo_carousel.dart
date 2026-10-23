@@ -1,18 +1,16 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
-import 'package:kumo/features/moments/domain/entities/moment_photo.dart';
+import 'package:kumo/core/widget/photo_placeholder.dart';
 
-class MomentPhotoCarousel extends StatefulWidget {
-  const new({required this.photos, super.key});
+class PhotoCarousel extends StatefulWidget {
+  const new({required this.images, super.key});
 
-  final List<MomentPhoto> photos;
+  final List<ImageProvider> images;
 
   @override
-  State<MomentPhotoCarousel> createState() => _MomentPhotoCarouselState();
+  State<PhotoCarousel> createState() => _PhotoCarouselState();
 }
 
-class _MomentPhotoCarouselState extends State<MomentPhotoCarousel> {
+class _PhotoCarouselState extends State<PhotoCarousel> {
   final PageController _pageController = PageController();
   int _currentPage = 0;
 
@@ -24,7 +22,7 @@ class _MomentPhotoCarouselState extends State<MomentPhotoCarousel> {
 
   @override
   Widget build(BuildContext context) {
-    final photos = widget.photos;
+    final photos = widget.images;
     if (photos.isEmpty) return const SizedBox.shrink();
 
     final screenWidth = MediaQuery.sizeOf(context).width;
@@ -60,7 +58,11 @@ class _MomentPhotoCarouselState extends State<MomentPhotoCarousel> {
                     ),
                   );
                 },
-                child: _MomentPhotoImage(photo: photos[index]),
+                child: Image(
+                  image: photos[index],
+                  fit: BoxFit.cover,
+                  errorBuilder: (_, _, _) => const PhotoPlaceholder(),
+                ),
               );
             },
           ),
@@ -73,49 +75,6 @@ class _MomentPhotoCarouselState extends State<MomentPhotoCarousel> {
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-/// Muestra la foto remota si ya se subió, o la local si todavía no.
-class _MomentPhotoImage extends StatelessWidget {
-  const new({required this.photo});
-
-  final MomentPhoto photo;
-
-  @override
-  Widget build(BuildContext context) {
-    final remoteUrl = photo.remoteUrl;
-    final localPath = photo.localPath;
-
-    if (remoteUrl != null) {
-      return Image.network(
-        remoteUrl,
-        fit: BoxFit.cover,
-        errorBuilder: (_, _, _) => const _PhotoPlaceholder(),
-      );
-    }
-    if (localPath != null) {
-      return Image.file(
-        File(localPath),
-        fit: BoxFit.cover,
-        errorBuilder: (_, _, _) => const _PhotoPlaceholder(),
-      );
-    }
-    return const _PhotoPlaceholder();
-  }
-}
-
-class _PhotoPlaceholder extends StatelessWidget {
-  const new();
-
-  @override
-  Widget build(BuildContext context) {
-    return const ColoredBox(
-      color: Color(0xFF1B1C24),
-      child: Center(
-        child: Icon(Icons.broken_image_outlined, color: Colors.white54),
       ),
     );
   }

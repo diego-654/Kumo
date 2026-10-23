@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:kumo/features/moments/domain/entities/moment.dart';
 import 'package:kumo/features/moments/presentation/providers/moments_providers.dart';
-import 'package:kumo/features/moments/presentation/widgets/moment_photo_carousel.dart';
+import 'package:kumo/features/moments/presentation/widgets/moment_card.dart';
 
 class MomentsScreen extends ConsumerWidget {
   const new({super.key});
@@ -23,7 +22,7 @@ class MomentsScreen extends ConsumerWidget {
                 itemCount: items.length,
                 separatorBuilder: (_, _) => const SizedBox(height: 24),
                 itemBuilder: (context, index) =>
-                    _MomentCard(moment: items[index]),
+                    MomentCard(moment: items[index]),
               ),
       ),
     );
@@ -58,27 +57,3 @@ class _EmptyMoments extends StatelessWidget {
   }
 }
 
-class _MomentCard extends StatelessWidget {
-  const new({required this.moment});
-
-  final Moment moment;
-
-  @override
-  Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        MomentPhotoCarousel(photos: moment.photos),
-        Padding(
-          padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
-          child: Text(moment.placeName, style: textTheme.titleMedium),
-        ),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Text(moment.note, style: textTheme.bodyMedium),
-        ),
-      ],
-    );
-  }
-}

@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:kumo/features/moments/domain/entities/moment_photo.dart';
+import 'package:kumo/features/moments/domain/entities/sentiment.dart';
 
 /// Un "momento": lo que el usuario siente en un lugar concreto.
 ///
@@ -14,6 +15,7 @@ class Moment {
     required this.note,
     required this.createdAt,
     this.photos = const [],
+    this.sentiment,
   });
 
   final String id;
@@ -21,6 +23,7 @@ class Moment {
   final String note;
   final DateTime createdAt;
   final List<MomentPhoto> photos;
+  final Sentiment? sentiment;
 
   @override
   bool operator ==(Object other) =>
@@ -29,9 +32,16 @@ class Moment {
       other.placeName == placeName &&
       other.note == note &&
       other.createdAt == createdAt &&
-      listEquals(other.photos, photos);
+      listEquals(other.photos, photos) &&
+      other.sentiment == sentiment;
 
   @override
-  int get hashCode =>
-      Object.hash(id, placeName, note, createdAt, Object.hashAll(photos));
+  int get hashCode => Object.hash(
+    id,
+    placeName,
+    note,
+    createdAt,
+    Object.hashAll(photos),
+    sentiment,
+  );
 }
