@@ -88,4 +88,9 @@ class InMemoryMomentsRepository implements MomentsRepository {
   Future<void> addMoment(Moment moment) async {
     _moments.add(moment);
   }
+
+  @override
+  Future<Moment?> getMomentById(String id) async {
+    return _moments.where((moment) => moment.id == id).firstOrNull;
+  }
 }

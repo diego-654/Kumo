@@ -2,4 +2,5 @@
 abstract final class AppRoutes {
   static const heatMap = '/map';
   static const moments = '/moments';
+  static String momentDetail(String id) => '$moments/$id';
 }
