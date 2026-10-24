@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:kumo/app/router/app_routes.dart';
 import 'package:kumo/features/moments/presentation/providers/moments_providers.dart';
+import 'package:kumo/features/moments/presentation/widgets/moment_card.dart';
 
 class MomentsScreen extends ConsumerWidget {
   const new({super.key});
@@ -17,13 +20,18 @@ class MomentsScreen extends ConsumerWidget {
         data: (items) => items.isEmpty
             ? const _EmptyMoments()
             : ListView.separated(
+                padding: const EdgeInsets.symmetric(
+                  vertical: 16,
+                  horizontal: 8,
+                ),
                 itemCount: items.length,
-                separatorBuilder: (_, _) => const Divider(height: 1),
+                separatorBuilder: (_, _) => const SizedBox(height: 4),
                 itemBuilder: (context, index) {
                   final moment = items[index];
-                  return ListTile(
-                    title: Text(moment.placeName),
-                    subtitle: Text(moment.note),
+                  return MomentCard(
+                    moment: moment,
+                    onTap: () =>
+                        context.push(AppRoutes.momentDetail(moment.id)),
                   );
                 },
               ),

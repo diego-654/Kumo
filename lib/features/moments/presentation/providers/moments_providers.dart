@@ -1,5 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/misc.dart';
 import 'package:kumo/features/moments/data/repositories/in_memory_moments_repository.dart';
+import 'package:kumo/features/moments/data/services/photo_picker_service.dart';
 import 'package:kumo/features/moments/domain/entities/moment.dart';
 import 'package:kumo/features/moments/domain/repositories/moments_repository.dart';
 
@@ -11,4 +13,14 @@ final momentsRepositoryProvider = Provider<MomentsRepository>(
 
 final momentsProvider = FutureProvider<List<Moment>>(
   (ref) => ref.watch(momentsRepositoryProvider).getMoments(),
+);
+
+final FutureProviderFamily<Moment?, String> momentByIdProvider =
+    FutureProvider.family<Moment?, String>(
+      (ref, id) => ref.watch(momentsRepositoryProvider).getMomentById(id),
+    );
+
+/// Cámara y galería. En tests: `photoPickerServiceProvider.overrideWithValue`.
+final photoPickerServiceProvider = Provider<PhotoPickerService>(
+  (ref) => PhotoPickerService(),
 );

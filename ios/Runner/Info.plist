@@ -66,5 +66,9 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+	<key>NSCameraUsageDescription</key>
+	<string>Kumo usa la cámara para que fotografíes el lugar de tu momento.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Kumo accede a tus fotos para que elijas imágenes de tu momento.</string>
 </dict>
 </plist>

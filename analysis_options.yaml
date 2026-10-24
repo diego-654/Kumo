@@ -16,3 +16,5 @@ linter:
     # Es una app, no un paquete publicado: documentar cada miembro público
     # genera ruido sin aportar valor.
     public_member_api_docs: false
+formatter:
+  trailing_commas: preserve
