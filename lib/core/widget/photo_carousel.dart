@@ -88,15 +88,16 @@ class _PhotoCounter extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12),
-        color: const Color(0xFF1B1C24),
+        color: colors.inverseSurface,
       ),
       child: Text(
         '$current / $total fotos',
-        style: const TextStyle(color: Colors.white, fontSize: 13),
+        style: TextStyle(color: colors.onInverseSurface, fontSize: 13),
       ),
     );
   }

@@ -5,6 +5,7 @@ import 'package:kumo/app/router/app_routes.dart';
 import 'package:kumo/app/router/home_shell.dart';
 import 'package:kumo/features/heat_map/presentation/screens/heat_map_screen.dart';
 import 'package:kumo/features/moments/presentation/screens/moment_detail_screen.dart';
+import 'package:kumo/features/moments/presentation/screens/moment_form_screen.dart';
 import 'package:kumo/features/moments/presentation/screens/moments_screen.dart';
 
 /// El router vive en un provider para que más adelante pueda leer otros
@@ -15,6 +16,12 @@ final appRouterProvider = Provider<GoRouter>((ref) {
     navigatorKey: rootNavigatorKey,
     initialLocation: AppRoutes.heatMap,
     routes: [
+      // Fuera del shell: se abre encima de todo (sin navbar) y se puede
+      // llegar desde cualquier tab.
+      GoRoute(
+        path: AppRoutes.newMoment,
+        builder: (context, state) => const MomentFormScreen(),
+      ),
       // Cada rama conserva su propio stack de navegación al cambiar de tab.
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) =>
@@ -41,6 +48,15 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                     builder: (context, state) => MomentDetailScreen(
                       momentId: state.pathParameters['id']!,
                     ),
+                    routes: [
+                      GoRoute(
+                        path: 'edit', // /moments/:id/edit
+                        parentNavigatorKey: rootNavigatorKey,
+                        builder: (context, state) => MomentFormScreen(
+                          momentId: state.pathParameters['id'],
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),

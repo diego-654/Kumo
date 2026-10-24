@@ -5,10 +5,14 @@ class PhotoPlaceholder extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const ColoredBox(
-      color: Color(0xFF1B1C24),
+    final colors = Theme.of(context).colorScheme;
+    return ColoredBox(
+      color: colors.surfaceContainerHighest,
       child: Center(
-        child: Icon(Icons.broken_image_outlined, color: Colors.white54),
+        child: Icon(
+          Icons.broken_image_outlined,
+          color: colors.onSurfaceVariant,
+        ),
       ),
     );
   }

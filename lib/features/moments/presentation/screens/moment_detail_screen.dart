@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:kumo/app/router/app_routes.dart';
 import 'package:kumo/core/extensions/date_time_extensions.dart';
 import 'package:kumo/core/widget/photo_carousel.dart';
 import 'package:kumo/features/moments/domain/entities/moment.dart';
@@ -35,8 +37,8 @@ class MomentDetailScreen extends ConsumerWidget {
         AsyncData(value: final _?) => SafeArea(
           minimum: const EdgeInsets.all(16),
           child: _ActionButtons(
-            onViewOnMap: () {},
-            onEdit: () {},
+            onViewOnMap: () => context.push(AppRoutes.newMoment),
+            onEdit: () => context.push(AppRoutes.editMoment(momentId)),
             onDelete: () {},
           ),
         ),
@@ -88,7 +90,7 @@ class _MomentView extends StatelessWidget {
             Text(
               moment.createdAt.toHumanReadable(),
               style: textTheme.bodyMedium?.copyWith(
-                color: const Color(0xFF555869),
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
             ),
             Text(
@@ -207,15 +209,12 @@ class _ActionTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
     final background = isDestructive
-        ? const Color(0xFFFCEBEB)
-        : const Color(0xFFF4F5FB);
-    final iconColor = isDestructive
-        ? const Color(0xFF9B1C1C)
-        : const Color(0xFF3442D9);
-    final textColor = isDestructive
-        ? const Color(0xFF9B1C1C)
-        : const Color(0xFF1B1C24);
+        ? colors.errorContainer
+        : colors.surfaceContainerLow;
+    final iconColor = isDestructive ? colors.error : colors.primary;
+    final textColor = isDestructive ? colors.error : colors.onSurface;
 
     return Material(
       color: background,

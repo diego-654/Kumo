@@ -4,7 +4,7 @@ class LabelChip extends StatelessWidget {
   const new({
     required this.label,
     required this.color,
-    this.labelColor = const Color(0xFF1B1C24),
+    this.labelColor,
     super.key,
   });
 
@@ -13,8 +13,8 @@ class LabelChip extends StatelessWidget {
   /// Color base: el fondo lo usa con transparencia.
   final Color color;
 
-  /// Color del texto. Por defecto oscuro para que se lea sobre cualquier fondo.
-  final Color labelColor;
+  /// Color del texto. Si es null usa `onSurface` del tema.
+  final Color? labelColor;
 
   @override
   Widget build(BuildContext context) {
@@ -29,7 +29,7 @@ class LabelChip extends StatelessWidget {
         style: TextStyle(
           fontSize: 12,
           fontWeight: FontWeight.w700,
-          color: labelColor,
+          color: labelColor ?? Theme.of(context).colorScheme.onSurface,
         ),
       ),
     );
