@@ -9,8 +9,7 @@ import 'package:kumo/features/moments/domain/repositories/moments_repository.dar
 /// Arranca con [_sampleMoments] para ver la UI con datos. En los tests
 /// se pasa `seed: []` para empezar vacío.
 class InMemoryMomentsRepository implements MomentsRepository {
-  InMemoryMomentsRepository({List<Moment>? seed})
-    : _moments = [...(seed ?? _sampleMoments)];
+  new({List<Moment>? seed}) : _moments = [...(seed ?? _sampleMoments)];
 
   final List<Moment> _moments;
 
@@ -85,12 +84,17 @@ class InMemoryMomentsRepository implements MomentsRepository {
   }
 
   @override
-  Future<void> addMoment(Moment moment) async {
-    _moments.add(moment);
+  Future<Moment?> getMomentById(String id) async {
+    return _moments.where((moment) => moment.id == id).firstOrNull;
   }
 
   @override
-  Future<Moment?> getMomentById(String id) async {
-    return _moments.where((moment) => moment.id == id).firstOrNull;
+  Future<void> saveMoment(Moment moment) async {
+    final index = _moments.indexWhere((m) => m.id == moment.id);
+    if (index == -1) {
+      _moments.add(moment);
+    } else {
+      _moments[index] = moment;
+    }
   }
 }

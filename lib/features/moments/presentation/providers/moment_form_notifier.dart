@@ -1,5 +1,8 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart';
+import 'package:kumo/features/moments/domain/entities/moment.dart';
 import 'package:kumo/features/moments/domain/entities/moment_photo.dart';
 import 'package:kumo/features/moments/presentation/providers/moment_form_state.dart';
 import 'package:kumo/features/moments/presentation/providers/moments_providers.dart';
@@ -20,8 +23,34 @@ class MomentFormNotifier extends Notifier<MomentFormState> {
 
   bool get isEditing => momentId != null;
 
+  /// El momento tal como estaba antes de editarlo. Al guardar se parte de
+  /// él para conservar lo que el formulario no toca (`createdAt`, emoción).
+  Moment? _original;
+
   @override
-  MomentFormState build() => const MomentFormState();
+  MomentFormState build() {
+    final id = momentId;
+    if (id == null) return const MomentFormState();
+
+    // `build` no puede ser async: arrancamos la carga y mientras tanto la
+    // pantalla muestra un indicador.
+    unawaited(_loadMoment(id));
+    return const MomentFormState(isLoading: true);
+  }
+
+  Future<void> _loadMoment(String id) async {
+    final moment = await ref.read(momentsRepositoryProvider).getMomentById(id);
+    if (!ref.mounted) return;
+    _original = moment;
+    state = moment == null
+        ? const MomentFormState()
+        : MomentFormState(
+            photos: moment.photos,
+            placeName: moment.placeName,
+            note: moment.note,
+            isPublic: moment.isPublic,
+          );
+  }
 
   // --- Fotos ---------------------------------------------------------------
 
@@ -63,6 +92,56 @@ class MomentFormNotifier extends Notifier<MomentFormState> {
 
   void setIsPublic({required bool value}) =>
       state = state.copyWith(isPublic: value);
+
+  // --- Guardar ------------------------------------------------------------
+
+  /// Guarda el borrador. Devuelve `true` si salió bien; la pantalla decide
+  /// qué hacer después (cerrar o avisar del error).
+  Future<bool> save() async {
+    if (!state.canSave) return false;
+    state = state.copyWith(isSaving: true);
+
+    final moment = _toMoment();
+    try {
+      await ref.read(momentsRepositoryProvider).saveMoment(moment);
+    } on Exception {
+      if (ref.mounted) state = state.copyWith(isSaving: false);
+      return false;
+    }
+
+    // Si el usuario salió mientras se guardaba, ya no podemos usar `ref`.
+    if (!ref.mounted) return true;
+    // La lista y el detalle vuelven a leer el repositorio.
+    ref
+      ..invalidate(momentsProvider)
+      ..invalidate(momentByIdProvider(moment.id));
+    state = state.copyWith(isSaving: false);
+    return true;
+  }
+
+  Moment _toMoment() {
+    final placeName = state.placeName.trim();
+    final note = state.note.trim();
+    final original = _original;
+
+    if (original != null) {
+      // Pendiente: si cambió la nota, volver a pedir la emoción a la IA.
+      return original.copyWith(
+        placeName: placeName,
+        note: note,
+        photos: state.photos,
+        isPublic: state.isPublic,
+      );
+    }
+    return Moment(
+      id: DateTime.now().microsecondsSinceEpoch.toString(),
+      placeName: placeName,
+      note: note,
+      createdAt: DateTime.now(),
+      photos: state.photos,
+      isPublic: state.isPublic,
+    );
+  }
 
   // --- Privados ------------------------------------------------------------
 

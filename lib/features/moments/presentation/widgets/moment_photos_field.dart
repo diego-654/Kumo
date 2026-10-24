@@ -33,53 +33,60 @@ class MomentPhotosField extends StatelessWidget {
     final textTheme = Theme.of(context).textTheme;
     final colors = Theme.of(context).colorScheme;
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      spacing: 10,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              'Fotos',
-              style: textTheme.titleSmall?.copyWith(
-                fontWeight: FontWeight.w600,
+    // Anima el pequeño cambio de alto cuando aparece el contador.
+    return AnimatedSize(
+      duration: const Duration(milliseconds: 200),
+      curve: Curves.easeOut,
+      alignment: Alignment.topCenter,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        spacing: 10,
+        children: [
+          // El contador solo aparece cuando ya hay fotos: antes no aporta.
+          if (photos.isNotEmpty)
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Fotos',
+                  style: textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                Text(
+                  '${photos.length} / $maxPhotos',
+                  style: textTheme.bodySmall?.copyWith(
+                    color: colors.onSurfaceVariant,
+                  ),
+                ),
+              ],
+            ),
+          if (photos.isEmpty)
+            _EmptyPhotos(
+              maxPhotos: maxPhotos,
+              onTap: () => _showAddOptions(context),
+            )
+          else
+            SizedBox(
+              height: _PhotoThumb.size,
+              child: ListView.separated(
+                scrollDirection: Axis.horizontal,
+                itemCount: photos.length + (_canAdd ? 1 : 0),
+                separatorBuilder: (_, _) => const SizedBox(width: 10),
+                itemBuilder: (context, index) {
+                  if (index == photos.length) {
+                    return _AddTile(onTap: () => _showAddOptions(context));
+                  }
+                  return _PhotoThumb(
+                    photo: photos[index],
+                    isCover: index == 0,
+                    onTap: () => _showPhotoOptions(context, index),
+                  );
+                },
               ),
             ),
-            Text(
-              '${photos.length} / $maxPhotos',
-              style: textTheme.bodySmall?.copyWith(
-                color: colors.onSurfaceVariant,
-              ),
-            ),
-          ],
-        ),
-        if (photos.isEmpty)
-          _EmptyPhotos(
-            maxPhotos: maxPhotos,
-            onCamera: onAddFromCamera,
-            onGallery: onAddFromGallery,
-          )
-        else
-          SizedBox(
-            height: _PhotoThumb.size,
-            child: ListView.separated(
-              scrollDirection: Axis.horizontal,
-              itemCount: photos.length + (_canAdd ? 1 : 0),
-              separatorBuilder: (_, _) => const SizedBox(width: 10),
-              itemBuilder: (context, index) {
-                if (index == photos.length) {
-                  return _AddTile(onTap: () => _showAddOptions(context));
-                }
-                return _PhotoThumb(
-                  photo: photos[index],
-                  isCover: index == 0,
-                  onTap: () => _showPhotoOptions(context, index),
-                );
-              },
-            ),
-          ),
-      ],
+        ],
+      ),
     );
   }
 
@@ -147,77 +154,58 @@ class MomentPhotosField extends StatelessWidget {
   }
 }
 
-/// Estado vacío: invita a tomar la primera foto, la acción principal.
+/// Estado vacío: un solo recuadro que se toca completo.
+///
+/// Mide lo mismo que la tira de miniaturas para que la pantalla no salte al
+/// agregar la primera foto.
+/// Cámara y Galería aparecen en el menú al tocarlo, no antes.
 class _EmptyPhotos extends StatelessWidget {
-  const new({
-    required this.maxPhotos,
-    required this.onCamera,
-    required this.onGallery,
-  });
+  const new({required this.maxPhotos, required this.onTap});
 
   final int maxPhotos;
-  final VoidCallback onCamera;
-  final VoidCallback onGallery;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
     final colors = Theme.of(context).colorScheme;
 
-    return Container(
+    return SizedBox(
+      height: _PhotoThumb.size,
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 28),
-      decoration: BoxDecoration(
+      child: Material(
         color: colors.surfaceContainerLow,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: colors.outlineVariant),
-      ),
-      child: Column(
-        spacing: 12,
-        children: [
-          Icon(Icons.add_a_photo_outlined, size: 40, color: colors.primary),
-          Text(
-            'Fotografía el lugar',
-            style: textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-          Text(
-            'Puedes agregar hasta $maxPhotos fotos. '
-            'La primera será la portada.',
-            style: textTheme.bodyMedium?.copyWith(
-              color: colors.onSurfaceVariant,
-            ),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 4),
-          Row(
-            spacing: 10,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+          side: BorderSide(color: colors.outlineVariant),
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: onTap,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            spacing: 4,
             children: [
-              Expanded(
-                child: FilledButton.icon(
-                  onPressed: onCamera,
-                  icon: const Icon(Icons.photo_camera_outlined),
-                  label: const Text('Cámara'),
-                  style: FilledButton.styleFrom(
-                    minimumSize: const Size.fromHeight(48),
-                  ),
+              Icon(
+                Icons.add_a_photo_outlined,
+                size: 32,
+                color: colors.primary,
+              ),
+              Text(
+                'Agregar fotos',
+                style: textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w700,
                 ),
               ),
-              Expanded(
-                child: OutlinedButton.icon(
-                  onPressed: onGallery,
-                  icon: const Icon(Icons.photo_library_outlined),
-                  label: const Text('Galería'),
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: colors.onSurface,
-                    minimumSize: const Size.fromHeight(48),
-                  ),
+              Text(
+                'Hasta $maxPhotos',
+                style: textTheme.bodySmall?.copyWith(
+                  color: colors.onSurfaceVariant,
                 ),
               ),
             ],
           ),
-        ],
+        ),
       ),
     );
   }

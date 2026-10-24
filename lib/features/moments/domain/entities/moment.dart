@@ -16,6 +16,7 @@ class Moment {
     required this.createdAt,
     this.photos = const [],
     this.sentiment,
+    this.isPublic = true,
   });
 
   final String id;
@@ -25,6 +26,28 @@ class Moment {
   final List<MomentPhoto> photos;
   final Sentiment? sentiment;
 
+  /// Si aparece en el mapa público o solo lo ve su autor.
+  final bool isPublic;
+
+  /// `id` y `createdAt` no cambian: siguen siendo el mismo momento.
+  Moment copyWith({
+    String? placeName,
+    String? note,
+    List<MomentPhoto>? photos,
+    Sentiment? sentiment,
+    bool? isPublic,
+  }) {
+    return Moment(
+      id: id,
+      placeName: placeName ?? this.placeName,
+      note: note ?? this.note,
+      createdAt: createdAt,
+      photos: photos ?? this.photos,
+      sentiment: sentiment ?? this.sentiment,
+      isPublic: isPublic ?? this.isPublic,
+    );
+  }
+
   @override
   bool operator ==(Object other) =>
       other is Moment &&
@@ -33,7 +56,8 @@ class Moment {
       other.note == note &&
       other.createdAt == createdAt &&
       listEquals(other.photos, photos) &&
-      other.sentiment == sentiment;
+      other.sentiment == sentiment &&
+      other.isPublic == isPublic;
 
   @override
   int get hashCode => Object.hash(
@@ -43,5 +67,6 @@ class Moment {
     createdAt,
     Object.hashAll(photos),
     sentiment,
+    isPublic,
   );
 }
