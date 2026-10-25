@@ -1,26 +1,17 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:kumo/features/heat_map/presentation/providers/heat_map_providers.dart';
 import 'package:kumo/features/heat_map/presentation/widgets/emotion_zones_layer.dart';
 import 'package:kumo/features/heat_map/presentation/widgets/map_view.dart';
 
-/// Placeholder: aquí irá el mapa de calor emocional por zonas.
-class HeatMapScreen extends ConsumerWidget {
+/// Mapa de calor emocional: zonas pintadas por la emoción dominante.
+class HeatMapScreen extends StatelessWidget {
   const new({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final moments = ref.watch(emotionZonesProvider);
-
-    return SafeArea(
+  Widget build(BuildContext context) {
+    return const SafeArea(
       child: Scaffold(
         body: Center(
-          child: MapView(
-            layers: [
-              if (moments case AsyncData(:final value))
-                EmotionZonesLayer(zones: value),
-            ],
-          ),
+          child: MapView(layers: [EmotionZonesLayer()]),
         ),
       ),
     );

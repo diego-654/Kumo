@@ -1,4 +1,7 @@
+import 'dart:math';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/misc.dart';
 import 'package:kumo/features/heat_map/domain/entities/emotion_zone.dart';
 import 'package:kumo/features/heat_map/domain/services/emotion_zone_builder.dart';
 import 'package:kumo/features/moments/domain/entities/moment.dart';
@@ -11,12 +14,15 @@ final mapMomentsProvider = FutureProvider<List<Moment>>((ref) async {
       .toList();
 });
 
+/// Zonas para un tamaño de celda. Riverpod guarda cada tamaño en caché,
+/// así que al volver a un zoom ya visitado no recalcula.
+final FutureProviderFamily<List<EmotionZone>, double> emotionZonesProvider =
+    FutureProvider.family<List<EmotionZone>, double>((ref, cellSize) async {
+      final moments = await ref.watch(mapMomentsProvider.future);
+      return EmotionZoneBuilder(cellSizeDegrees: cellSize).build(moments);
+    });
 
-final emotionZoneBuilderProvider = Provider<EmotionZoneBuilder>(
-  (ref) => const EmotionZoneBuilder(),
-);
-
-final emotionZonesProvider = FutureProvider<List<EmotionZone>>((ref) async {
-  final moments = await ref.watch(mapMomentsProvider.future);
-  return ref.watch(emotionZoneBuilderProvider).build(moments);
-});
+/// Zoom 15 → 0.003° (~330 m). Cada nivel que te alejas, el doble.
+/// Mínimo ~165 m, máximo ~2.6 km.
+double cellSizeForZoom(int zoom) =>
+    (0.003 * pow(2, 15 - zoom)).clamp(0.0015, 0.024);
