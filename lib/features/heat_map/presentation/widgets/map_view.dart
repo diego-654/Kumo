@@ -22,7 +22,7 @@ class MapView extends StatelessWidget {
   static const _mapTilerKey = String.fromEnvironment('MAPTILER_KEY');
 
   /// Estilo de MapTiler: dataviz, pastel, streets-v2, basic-v2...
-  static const _mapTilerStyle = 'basic-v2';
+  static const _mapTilerStyle = 'dataviz';
 
   /// Quita el color (matriz de luminancia) y aclara un 35 % hacia blanco.
   static const _muted = ColorFilter.matrix(<double>[
