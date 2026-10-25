@@ -18,7 +18,7 @@ class InMemoryMomentsRepository implements MomentsRepository {
     Moment(
       id: '1',
       placeName: 'Café Central',
-      location: const GeoPoint(latitude: 19.4180, longitude: -99.1620),
+      location: const GeoPoint(latitude: 19.4340, longitude: -99.1380),
       note: 'Tranquilo y acogedor, perfecto para leer un rato',
       createdAt: DateTime(2026, 10, 20, 9, 30),
       photos: const [
@@ -31,7 +31,7 @@ class InMemoryMomentsRepository implements MomentsRepository {
     Moment(
       id: '2',
       placeName: 'Taquería El Güero',
-      location: const GeoPoint(latitude: 19.4205, longitude: -99.1630),
+      location: const GeoPoint(latitude: 19.4300, longitude: -99.1360),
       note: 'Feliz, con amigos y los mejores tacos al pastor',
       createdAt: DateTime(2026, 10, 21, 21, 15),
       photos: const [
@@ -43,7 +43,7 @@ class InMemoryMomentsRepository implements MomentsRepository {
     Moment(
       id: '3',
       placeName: 'Parque de la infancia',
-      location: const GeoPoint(latitude: 19.4113, longitude: -99.1696),
+      location: const GeoPoint(latitude: 19.4357, longitude: -99.1440),
       note: 'Volví al parque donde jugaba de niño, me trajo muchos recuerdos',
       createdAt: DateTime(2026, 10, 18, 17, 45),
       photos: const [
@@ -54,7 +54,7 @@ class InMemoryMomentsRepository implements MomentsRepository {
     Moment(
       id: '4',
       placeName: 'Estación de tren',
-      location: const GeoPoint(latitude: 19.4466, longitude: -99.1527),
+      location: const GeoPoint(latitude: 19.4390, longitude: -99.1300),
       note: 'Despedí a mi hermana, se va a vivir a otra ciudad',
       createdAt: DateTime(2026, 10, 15, 7, 10),
       photos: const [
@@ -71,7 +71,7 @@ class InMemoryMomentsRepository implements MomentsRepository {
     Moment(
       id: '5',
       placeName: 'Avenida Principal',
-      location: const GeoPoint(latitude: 19.4270, longitude: -99.1676),
+      location: const GeoPoint(latitude: 19.4290, longitude: -99.1415),
       note: 'Dos horas atrapado en el tráfico, llegué tarde a todo',
       createdAt: DateTime(2026, 10, 22, 8, 50),
       photos: const [
