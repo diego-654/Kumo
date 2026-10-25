@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:kumo/core/location/geo_point.dart';
 import 'package:kumo/features/moments/domain/entities/moment_photo.dart';
 import 'package:kumo/features/moments/domain/entities/sentiment.dart';
 
@@ -17,6 +18,7 @@ class Moment {
     this.photos = const [],
     this.sentiment,
     this.isPublic = true,
+    this.location,
   });
 
   final String id;
@@ -25,6 +27,7 @@ class Moment {
   final DateTime createdAt;
   final List<MomentPhoto> photos;
   final Sentiment? sentiment;
+  final GeoPoint? location;
 
   /// Si aparece en el mapa público o solo lo ve su autor.
   final bool isPublic;
@@ -36,6 +39,7 @@ class Moment {
     List<MomentPhoto>? photos,
     Sentiment? sentiment,
     bool? isPublic,
+    GeoPoint? location,
   }) {
     return Moment(
       id: id,
@@ -45,6 +49,7 @@ class Moment {
       photos: photos ?? this.photos,
       sentiment: sentiment ?? this.sentiment,
       isPublic: isPublic ?? this.isPublic,
+      location: location ?? this.location,
     );
   }
 
@@ -57,7 +62,8 @@ class Moment {
       other.createdAt == createdAt &&
       listEquals(other.photos, photos) &&
       other.sentiment == sentiment &&
-      other.isPublic == isPublic;
+      other.isPublic == isPublic &&
+      other.location == location;
 
   @override
   int get hashCode => Object.hash(
@@ -68,5 +74,6 @@ class Moment {
     Object.hashAll(photos),
     sentiment,
     isPublic,
+    location,
   );
 }
