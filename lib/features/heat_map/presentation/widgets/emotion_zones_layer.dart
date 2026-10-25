@@ -3,45 +3,88 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:kumo/features/heat_map/domain/entities/emotion_zone.dart';
 import 'package:kumo/features/heat_map/presentation/providers/heat_map_providers.dart';
 import 'package:kumo/features/moments/presentation/extensions/emotion_style.dart';
 import 'package:latlong2/latlong.dart';
 
-/// Pinta las zonas de emoción. Va dentro de `FlutterMap`: lee el zoom con
-/// `MapCamera.of` y elige el tamaño de celda (más zoom, más detalle).
+/// Pinta las zonas de emoción como degradados radiales (boceto 4). Va
+/// dentro de `FlutterMap`: lee el zoom con `MapCamera.of` y elige el
+/// tamaño de celda (más zoom, más detalle).
 class EmotionZonesLayer extends ConsumerWidget {
   const new({super.key});
 
+  static const _distance = Distance();
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final camera = MapCamera.of(context);
     // Redondeado: solo recalcula al cambiar de nivel, no en cada gesto.
-    final zoom = MapCamera.of(context).zoom.round();
-    final cellSize = cellSizeForZoom(zoom);
+    final cellSize = cellSizeForZoom(camera.zoom.round());
     final zones = ref.watch(emotionZonesProvider(cellSize)).value ?? [];
     final cellMeters = cellSize * 111000; // 1° ≈ 111 km
     final maxCount = zones.fold(1, (m, z) => max(m, z.momentCount));
 
-    return CircleLayer(
-      circles: [
-        for (final zone in zones)
-          CircleMarker(
-            point: LatLng(zone.center.latitude, zone.center.longitude),
-            radius: _radius(zone.momentCount, maxCount, cellMeters),
-            useRadiusInMeter: true,
-            color: zone.dominant.color.withValues(
-              alpha: _opacity(zone.momentCount, maxCount),
-            ),
-          ),
-      ],
+    final blobs = [
+      for (final zone in zones)
+        _blob(camera, zone, cellMeters, sqrt(zone.momentCount / maxCount)),
+    ];
+
+    return MobileLayerTransformer(
+      child: CustomPaint(size: camera.size, painter: _ZonesPainter(blobs)),
     );
   }
 
-  /// Del 25 % al 55 % de la celda: crece con el zoom y con los momentos.
-  /// Con sqrt el área crece proporcional a los momentos.
-  double _radius(int count, int maxCount, double cellMeters) =>
-      cellMeters * (0.25 + 0.30 * sqrt(count / maxCount));
+  /// [weight] va de 0 (zona casi vacía) a 1 (la más llena). Con sqrt el
+  /// área crece proporcional a los momentos.
+  _Blob _blob(
+    MapCamera camera,
+    EmotionZone zone,
+    double cellMeters,
+    double weight,
+  ) {
+    final center = LatLng(zone.center.latitude, zone.center.longitude);
+    // Del 45 % al 85 % de la celda: el borde se desvanece, así que más
+    // grande que un círculo plano para que las vecinas se fundan.
+    final meters = cellMeters * (0.45 + 0.40 * weight);
+    final offset = camera.getOffsetFromOrigin(center);
+    final edge = camera.getOffsetFromOrigin(
+      _distance.offset(center, meters, 180),
+    );
+    return (
+      center: offset,
+      radius: (offset - edge).distance,
+      color: zone.dominant.color,
+      strength: 0.55 + 0.35 * weight, // opacidad del centro
+    );
+  }
+}
 
-  /// De 0.3 (zona casi vacía) a 0.65 (la más llena), relativo como el radio.
-  double _opacity(int count, int maxCount) =>
-      0.3 + (0.65 - 0.3) * sqrt(count / maxCount);
+typedef _Blob = ({Offset center, double radius, Color color, double strength});
+
+/// Pinta cada zona como en el boceto: centro fuerte que se desvanece.
+class _ZonesPainter extends CustomPainter {
+  new(this.blobs);
+
+  final List<_Blob> blobs;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    for (final b in blobs) {
+      final rect = Rect.fromCircle(center: b.center, radius: b.radius);
+      final paint = Paint()
+        ..shader = RadialGradient(
+          colors: [
+            b.color.withValues(alpha: b.strength),
+            b.color.withValues(alpha: b.strength * 0.4),
+            b.color.withValues(alpha: 0),
+          ],
+          stops: const [0, 0.45, 1],
+        ).createShader(rect);
+      canvas.drawCircle(b.center, b.radius, paint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(_ZonesPainter oldDelegate) => true; // el mapa se mueve
 }
