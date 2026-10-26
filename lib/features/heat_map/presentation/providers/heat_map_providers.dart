@@ -26,3 +26,16 @@ final FutureProviderFamily<List<EmotionZone>, double> emotionZonesProvider =
 /// Mínimo ~165 m, máximo ~2.6 km.
 double cellSizeForZoom(int zoom) =>
     (0.003 * pow(2, 15 - zoom)).clamp(0.0015, 0.024);
+
+/// La zona que el usuario tocó; `null` = ninguna (la hoja no se muestra).
+final selectedZoneProvider =
+    NotifierProvider<SelectedZoneNotifier, EmotionZone?>(
+      SelectedZoneNotifier.new,
+    );
+
+class SelectedZoneNotifier extends Notifier<EmotionZone?> {
+  @override
+  EmotionZone? build() => null;
+
+  void select(EmotionZone? zone) => state = zone;
+}

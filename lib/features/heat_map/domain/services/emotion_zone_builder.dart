@@ -10,29 +10,44 @@ class EmotionZoneBuilder {
 
   final double cellSizeDegrees;
 
+  /// (fila, columna) de la celda donde cae [point]. La usan el builder y la
+  /// pantalla al tocar el mapa, así la fórmula vive en un solo sitio.
+  (int, int) cellOf(GeoPoint point) => (
+    (point.latitude / cellSizeDegrees).floor(),
+    (point.longitude / cellSizeDegrees).floor(),
+  );
+
   List<EmotionZone> build(List<Moment> moments) {
     final cells = <(int, int), List<Moment>>{};
     for (final m in moments) {
       final loc = m.location;
       if (loc == null || m.sentiment == null) continue;
-      final cell = (
-        (loc.latitude / cellSizeDegrees).floor(),
-        (loc.longitude / cellSizeDegrees).floor(),
-      );
-      (cells[cell] ??= []).add(m);
+      (cells[cellOf(loc)] ??= []).add(m);
     }
 
     return [
       for (final MapEntry(key: cell, value: group) in cells.entries)
         EmotionZone(
+          cell: cell,
           center: GeoPoint(
             latitude: (cell.$1 + 0.5) * cellSizeDegrees,
             longitude: (cell.$2 + 0.5) * cellSizeDegrees,
           ),
           dominant: _dominant(group),
-          momentCount: group.length,
+          breakdown: _breakdown(group),
+          moments: List.unmodifiable(group),
         ),
     ];
+  }
+
+  /// Cuántos momentos hay de cada emoción.
+  Map<Emotion, int> _breakdown(List<Moment> group) {
+    final counts = <Emotion, int>{};
+    for (final m in group) {
+      final emotion = m.sentiment!.emotion;
+      counts[emotion] = (counts[emotion] ?? 0) + 1;
+    }
+    return Map.unmodifiable(counts);
   }
 
   /// La emoción que más suma, pesando cada momento por su confianza.

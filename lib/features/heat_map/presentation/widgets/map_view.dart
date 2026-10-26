@@ -15,6 +15,8 @@ class MapView extends StatelessWidget {
     this.initialCenter = _cdmx,
     this.initialZoom = 13,
     this.layers = const [],
+    this.controller,
+    this.onTap,
   });
 
   static const _cdmx = LatLng(19.4326, -99.1332);
@@ -39,16 +41,24 @@ class MapView extends StatelessWidget {
   final double initialZoom;
   final List<Widget> layers;
 
+  /// Para leer la cámara (zoom) o moverla desde fuera.
+  final MapController? controller;
+
+  /// Avisa dónde se tocó el mapa. Qué hacer con eso lo decide la pantalla.
+  final void Function(LatLng point)? onTap;
+
   @override
   Widget build(BuildContext context) {
     const hasKey = _mapTilerKey != '';
 
     return FlutterMap(
+      mapController: controller,
       options: MapOptions(
         initialCenter: initialCenter,
         initialZoom: initialZoom,
         minZoom: 3,
         maxZoom: 18,
+        onTap: onTap == null ? null : (_, point) => onTap!(point),
       ),
       children: [
         if (hasKey)
