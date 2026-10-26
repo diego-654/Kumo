@@ -25,9 +25,20 @@ class EmotionZonesLayer extends ConsumerWidget {
     final cellMeters = cellSize * 111000; // 1° ≈ 111 km
     final maxCount = zones.fold(1, (m, z) => max(m, z.momentCount));
 
+    // Con una zona seleccionada, las demás se atenúan para enfocarla. Si
+    // la seleccionada no está en este zoom, no se atenúa nada.
+    final selected = ref.watch(selectedZoneProvider)?.cell;
+    final focus = zones.any((z) => z.cell == selected) ? selected : null;
+
     final blobs = [
       for (final zone in zones)
-        _blob(camera, zone, cellMeters, sqrt(zone.momentCount / maxCount)),
+        _blob(
+          camera,
+          zone,
+          cellMeters,
+          sqrt(zone.momentCount / maxCount),
+          faded: focus != null && zone.cell != focus,
+        ),
     ];
 
     return MobileLayerTransformer(
@@ -41,8 +52,9 @@ class EmotionZonesLayer extends ConsumerWidget {
     MapCamera camera,
     EmotionZone zone,
     double cellMeters,
-    double weight,
-  ) {
+    double weight, {
+    required bool faded,
+  }) {
     final center = LatLng(zone.center.latitude, zone.center.longitude);
     // Del 45 % al 85 % de la celda: el borde se desvanece, así que más
     // grande que un círculo plano para que las vecinas se fundan.
@@ -55,7 +67,8 @@ class EmotionZonesLayer extends ConsumerWidget {
       center: offset,
       radius: (offset - edge).distance,
       color: zone.dominant.color,
-      strength: 0.55 + 0.35 * weight, // opacidad del centro
+      // Opacidad del centro; al 35 % si otra zona tiene el foco.
+      strength: (0.55 + 0.35 * weight) * (faded ? 0.35 : 1),
     );
   }
 }
