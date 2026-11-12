@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:kumo/app/router/app_routes.dart';
+import 'package:kumo/core/widget/error_view.dart';
 import 'package:kumo/features/moments/presentation/providers/moments_providers.dart';
 import 'package:kumo/features/moments/presentation/widgets/moment_card.dart';
 import 'package:material_ui/material_ui.dart';
@@ -16,7 +17,10 @@ class MomentsScreen extends ConsumerWidget {
       appBar: AppBar(title: const Text('Momentos')),
       body: moments.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, _) => Center(child: Text('Error: $error')),
+        error: (_, _) => ErrorView(
+          message: 'No pudimos cargar tus momentos.',
+          onRetry: () => ref.invalidate(momentsProvider),
+        ),
         data: (items) => items.isEmpty
             ? const _EmptyMoments()
             : ListView.separated(
@@ -65,6 +69,14 @@ class _EmptyMoments extends StatelessWidget {
               'Fotografía un lugar y cuéntanos cómo te hace sentir.',
               style: textTheme.bodyMedium,
               textAlign: TextAlign.center,
+            ),
+            // Un estado vacío sin acción deja al usuario sin saber qué
+            // hacer: siempre le damos el siguiente paso.
+            const SizedBox(height: 24),
+            FilledButton.icon(
+              onPressed: () => context.push(AppRoutes.newMoment),
+              icon: const Icon(Icons.photo_camera_outlined),
+              label: const Text('Registrar mi primer momento'),
             ),
           ],
         ),

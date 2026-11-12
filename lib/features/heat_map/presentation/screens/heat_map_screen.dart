@@ -10,6 +10,7 @@ import 'package:kumo/core/location/location_service.dart';
 import 'package:kumo/features/heat_map/domain/entities/emotion_zone.dart';
 import 'package:kumo/features/heat_map/domain/services/emotion_zone_builder.dart';
 import 'package:kumo/features/heat_map/presentation/providers/heat_map_providers.dart';
+import 'package:kumo/features/heat_map/presentation/widgets/emotion_legend.dart';
 import 'package:kumo/features/heat_map/presentation/widgets/emotion_zones_layer.dart';
 import 'package:kumo/features/heat_map/presentation/widgets/map_view.dart';
 import 'package:kumo/features/heat_map/presentation/widgets/my_location_layer.dart';
@@ -56,6 +57,29 @@ class _HeatMapScreenState extends ConsumerState<HeatMapScreen>
 
   /// Solo avisamos de errores si el usuario tocó el botón.
   bool _fromButton = false;
+
+  /// Zoom al llevar la cámara a un momento: se ve la calle.
+  static const double _focusZoom = 16;
+
+  @override
+  void initState() {
+    super.initState();
+    // listenManual (y no ref.listen en build) porque necesitamos
+    // `fireImmediately`: si la petición llegó antes de que el mapa
+    // existiera (abriste el detalle desde un enlace), también se atiende.
+    ref.listenManual(mapFocusRequestProvider, (_, point) {
+      if (point == null) return;
+      // Esperamos al primer frame: antes el MapController no está listo.
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        _followUser = false; // que el GPS no nos robe la cámara
+        final dest = LatLng(point.latitude, point.longitude);
+        _lastCentered = dest;
+        unawaited(_map.animateTo(dest: dest, zoom: _focusZoom));
+        ref.read(mapFocusRequestProvider.notifier).point = null;
+      });
+    }, fireImmediately: true);
+  }
 
   @override
   void dispose() {
@@ -205,6 +229,8 @@ class _HeatMapScreenState extends ConsumerState<HeatMapScreen>
                     : const Icon(Icons.my_location),
               ),
             ),
+            // Arriba a la izquierda, simétrico al de ubicación.
+            const Positioned(top: 12, left: 12, child: EmotionLegendButton()),
             if (selected != null)
               // La key reinicia la hoja al cambiar de zona (vuelve al 30 %).
               ZoneSummarySheet(

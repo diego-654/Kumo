@@ -97,7 +97,9 @@ class _PhotoCounter extends StatelessWidget {
       ),
       child: Text(
         '$current / $total fotos',
-        style: TextStyle(color: colors.onInverseSurface, fontSize: 13),
+        style: Theme.of(
+          context,
+        ).textTheme.labelMedium?.copyWith(color: colors.onInverseSurface),
       ),
     );
   }

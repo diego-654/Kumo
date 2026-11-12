@@ -110,14 +110,19 @@ class _ZoneHeader extends StatelessWidget {
                 title,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.w800,
-                ),
+                style:
+                    Theme.of(
+                          context,
+                        ).textTheme.headlineSmall
+                        ?.copyWith(fontWeight: FontWeight.w800),
               ),
               Text(
                 '$count ${count == 1 ? 'momento' : 'momentos'}',
-                style: TextStyle(fontSize: 14, color: colors.onSurfaceVariant),
+                style:
+                    Theme.of(
+                          context,
+                        ).textTheme.bodyMedium
+                        ?.copyWith(color: colors.onSurfaceVariant),
               ),
             ],
           ),
@@ -160,8 +165,7 @@ class _DominantBadge extends StatelessWidget {
           ),
           Text(
             emotion.label,
-            style: TextStyle(
-              fontSize: 14,
+            style: Theme.of(context).textTheme.labelLarge?.copyWith(
               fontWeight: FontWeight.w700,
               color: emotions.label(emotion),
             ),
@@ -186,6 +190,7 @@ class _PlaceTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
     final count = place.momentCount;
     final cover = place.cover;
 
@@ -224,16 +229,14 @@ class _PlaceTile extends StatelessWidget {
                       place.name,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        fontSize: 16,
+                      style: textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.w700,
                       ),
                     ),
                     Text(
                       '${place.dominant.label} · $count '
                       '${count == 1 ? 'momento' : 'momentos'}',
-                      style: TextStyle(
-                        fontSize: 14,
+                      style: textTheme.bodyMedium?.copyWith(
                         color: colors.onSurfaceVariant,
                       ),
                     ),

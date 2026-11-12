@@ -10,4 +10,8 @@ abstract interface class MomentsRepository {
 
   /// Crea el momento o, si ya existe uno con el mismo `id`, lo reemplaza.
   Future<void> saveMoment(Moment moment);
+
+  /// Borra el momento. Si no existe, no hace nada (borrar dos veces no es
+  /// un error: el resultado final es el mismo).
+  Future<void> deleteMoment(String id);
 }

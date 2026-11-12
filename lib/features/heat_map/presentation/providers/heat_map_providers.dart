@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart';
+import 'package:kumo/core/location/geo_point.dart';
 import 'package:kumo/features/heat_map/domain/entities/emotion_zone.dart';
 import 'package:kumo/features/heat_map/domain/services/emotion_zone_builder.dart';
 import 'package:kumo/features/moments/domain/entities/moment.dart';
@@ -49,6 +50,22 @@ final FutureProviderFamily<List<EmotionZone>, double> emotionZonesProvider =
 /// Mínimo ~165 m, máximo ~2.6 km.
 double cellSizeForZoom(int zoom) =>
     (0.003 * pow(2, 15 - zoom)).clamp(0.0015, 0.024);
+
+/// Un punto al que otra pantalla pide llevar la cámara del mapa (por
+/// ejemplo "Ver en mapa" desde el detalle de un momento). El mapa lo
+/// consume y lo vuelve a `null`.
+final mapFocusRequestProvider =
+    NotifierProvider<MapFocusRequestNotifier, GeoPoint?>(
+      MapFocusRequestNotifier.new,
+    );
+
+class MapFocusRequestNotifier extends Notifier<GeoPoint?> {
+  @override
+  GeoPoint? build() => null;
+
+  GeoPoint? get point => state;
+  set point(GeoPoint? point) => state = point;
+}
 
 /// La zona que el usuario tocó; `null` = ninguna (la hoja no se muestra).
 final selectedZoneProvider =

@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:kumo/app/router/app_routes.dart';
 import 'package:kumo/core/extensions/date_time_extensions.dart';
 import 'package:kumo/core/theme/emotion_colors.dart';
+import 'package:kumo/core/widget/error_view.dart';
 import 'package:kumo/core/widget/photo_carousel.dart';
 import 'package:kumo/core/widget/photo_placeholder.dart';
 import 'package:kumo/features/heat_map/presentation/providers/heat_map_providers.dart';
@@ -22,11 +23,22 @@ class PlaceDetailScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final momentsAsync = ref.watch(placeMomentsProvider(placeName));
+    // Con datos, el botón de volver flota sobre las fotos (_PhotoHeader).
+    // En cualquier otro estado no hay fotos, así que usamos un AppBar
+    // normal: sin él, en iOS no habría forma de salir de la pantalla.
+    final showsPhotoHeader = switch (momentsAsync) {
+      AsyncData(:final value) => value.isNotEmpty,
+      _ => false,
+    };
 
     return Scaffold(
+      appBar: showsPhotoHeader ? null : AppBar(title: Text(placeName)),
       body: momentsAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, _) => Center(child: Text('Error: $error')),
+        error: (_, _) => ErrorView(
+          message: 'No pudimos cargar los momentos de este lugar.',
+          onRetry: () => ref.invalidate(placeMomentsProvider(placeName)),
+        ),
         data: (moments) => moments.isEmpty
             ? const Center(child: Text('Aún no hay momentos públicos aquí'))
             : _PlaceView(name: placeName, moments: moments),
@@ -34,19 +46,16 @@ class PlaceDetailScreen extends ConsumerWidget {
       // Fijo al fondo, como en el boceto.
       bottomNavigationBar: SafeArea(
         minimum: const EdgeInsets.fromLTRB(20, 8, 20, 16),
-        child: SizedBox(
-          height: 56,
-          child: FilledButton(
-            onPressed: () => context.push(AppRoutes.newMoment),
-            style: FilledButton.styleFrom(
-              shape: const StadiumBorder(),
-              textStyle: const TextStyle(
-                fontSize: 17,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-            child: const Text('Registrar mi momento aquí'),
+        child: FilledButton(
+          onPressed: () => context.push(AppRoutes.newMoment),
+          style: FilledButton.styleFrom(
+            minimumSize: const Size.fromHeight(56),
+            shape: const StadiumBorder(),
+            textStyle: Theme.of(
+              context,
+            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
           ),
+          child: const Text('Registrar mi momento aquí'),
         ),
       ),
     );
@@ -78,6 +87,7 @@ class _PlaceViewState extends State<_PlaceView> {
         for (final photo in moment.photos) photo.image,
     ];
     final count = moments.length;
+    final theme = Theme.of(context);
 
     return ListView(
       padding: EdgeInsets.zero,
@@ -95,17 +105,15 @@ class _PlaceViewState extends State<_PlaceView> {
                 children: [
                   Text(
                     widget.name,
-                    style: const TextStyle(
-                      fontSize: 26,
+                    style: theme.textTheme.headlineSmall?.copyWith(
                       fontWeight: FontWeight.w800,
                     ),
                   ),
                   // Sin categoría ni distancia todavía: solo lo que hay.
                   Text(
                     '$count ${count == 1 ? 'momento' : 'momentos'}',
-                    style: TextStyle(
-                      fontSize: 15,
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    style: theme.textTheme.bodyLarge?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
                     ),
                   ),
                 ],
@@ -218,6 +226,7 @@ class _FeelingCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final fill = EmotionColors.of(context).fill(emotion);
+    final theme = Theme.of(context);
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -242,17 +251,15 @@ class _FeelingCard extends StatelessWidget {
               children: [
                 Text(
                   _phrase,
-                  style: const TextStyle(
-                    fontSize: 16,
+                  style: theme.textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.w700,
                   ),
                 ),
                 Text(
                   'Según $momentCount '
                   '${momentCount == 1 ? 'momento' : 'momentos'}',
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
                   ),
                 ),
               ],
@@ -278,24 +285,32 @@ class _TabPill extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
 
-    return SizedBox(
-      height: 36,
-      child: TextButton(
-        onPressed: onTap,
-        style: TextButton.styleFrom(
-          padding: const EdgeInsets.symmetric(horizontal: 14),
-          backgroundColor: selected ? colors.onSurface : colors.surface,
-          foregroundColor: selected ? colors.surface : colors.onSurface,
-          textStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
-          shape: StadiumBorder(
-            side: selected
-                ? BorderSide.none
-                : BorderSide(color: colors.outlineVariant, width: 1.5),
+    // MergeSemantics junta el "seleccionado" con el botón en un solo nodo:
+    // el lector de pantalla dice "Fotos, botón, seleccionado".
+    return MergeSemantics(
+      child: Semantics(
+        selected: selected,
+        child: TextButton(
+          onPressed: onTap,
+          style: TextButton.styleFrom(
+            minimumSize: const Size(0, 36),
+            padding: const EdgeInsets.symmetric(horizontal: 14),
+            backgroundColor: selected ? colors.onSurface : colors.surface,
+            foregroundColor: selected ? colors.surface : colors.onSurface,
+            textStyle: theme.textTheme.labelLarge?.copyWith(
+              fontWeight: FontWeight.w600,
+            ),
+            shape: StadiumBorder(
+              side: selected
+                  ? BorderSide.none
+                  : BorderSide(color: colors.outlineVariant, width: 1.5),
+            ),
           ),
+          child: Text(label),
         ),
-        child: Text(label),
       ),
     );
   }
@@ -310,6 +325,7 @@ class _MomentRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
     final colors = Theme.of(context).colorScheme;
     final emotion = moment.sentiment?.emotion;
 
@@ -335,8 +351,7 @@ class _MomentRow extends StatelessWidget {
                     moment.createdAt.toHumanReadable(),
                     if (emotion != null) emotion.label,
                   ].join(' · '),
-                  style: TextStyle(
-                    fontSize: 14,
+                  style: textTheme.bodyMedium?.copyWith(
                     fontWeight: FontWeight.w500,
                     color: colors.onSurfaceVariant,
                   ),
@@ -345,8 +360,7 @@ class _MomentRow extends StatelessWidget {
                   moment.note,
                   maxLines: 3,
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    fontSize: 15,
+                  style: textTheme.bodyLarge?.copyWith(
                     height: 1.4,
                     color: colors.onSurface,
                   ),

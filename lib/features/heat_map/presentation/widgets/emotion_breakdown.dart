@@ -84,8 +84,7 @@ class _LegendItem extends StatelessWidget {
         Expanded(
           child: Text(
             emotion.label,
-            style: TextStyle(
-              fontSize: 14,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
               color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
           ),
