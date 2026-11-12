@@ -103,4 +103,9 @@ class InMemoryMomentsRepository implements MomentsRepository {
       _moments[index] = moment;
     }
   }
+
+  @override
+  Future<void> deleteMoment(String id) async {
+    _moments.removeWhere((m) => m.id == id);
+  }
 }

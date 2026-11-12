@@ -257,9 +257,8 @@ class _PhotoThumb extends StatelessWidget {
                     ),
                     child: Text(
                       'Portada',
-                      style: TextStyle(
+                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
                         color: colors.onInverseSurface,
-                        fontSize: 11,
                         fontWeight: FontWeight.w700,
                       ),
                     ),
@@ -296,9 +295,8 @@ class _AddTile extends StatelessWidget {
               Icon(Icons.add, color: colors.primary, size: 28),
               Text(
                 'Agregar',
-                style: TextStyle(
+                style: Theme.of(context).textTheme.labelLarge?.copyWith(
                   color: colors.primary,
-                  fontSize: 13,
                   fontWeight: FontWeight.w600,
                 ),
               ),

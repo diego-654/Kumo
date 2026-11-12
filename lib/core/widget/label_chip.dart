@@ -26,8 +26,7 @@ class LabelChip extends StatelessWidget {
       ),
       child: Text(
         label,
-        style: TextStyle(
-          fontSize: 12,
+        style: Theme.of(context).textTheme.labelMedium?.copyWith(
           fontWeight: FontWeight.w700,
           color: labelColor ?? Theme.of(context).colorScheme.onSurface,
         ),

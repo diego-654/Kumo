@@ -39,5 +39,21 @@ void main() {
 
       expect(await repository.getMoments(), [edited]);
     });
+
+    test('deleteMoment lo quita y borrar dos veces no falla', () async {
+      final moment = Moment(
+        id: '1',
+        placeName: 'Café Central',
+        note: 'Tranquilo',
+        createdAt: DateTime(2026),
+      );
+      final repository = InMemoryMomentsRepository(seed: [moment]);
+
+      await repository.deleteMoment('1');
+      await repository.deleteMoment('1');
+
+      expect(await repository.getMoments(), isEmpty);
+      expect(await repository.getMomentById('1'), isNull);
+    });
   });
 }

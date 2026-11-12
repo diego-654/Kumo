@@ -18,6 +18,20 @@ class KumoNavDestination {
   final String label;
 }
 
+/// La acción principal de la app, en el centro de la barra (en Kumo,
+/// registrar un momento). No es un destino: no se queda "seleccionada",
+/// abre una pantalla encima.
+@immutable
+class KumoNavAction {
+  const new({required this.icon, required this.label, required this.onTap});
+
+  final IconData icon;
+
+  /// No se ve: es lo que anuncia el lector de pantalla y el tooltip.
+  final String label;
+  final VoidCallback onTap;
+}
+
 /// Barra de navegación inferior de Kumo, flotante y con efecto vidrio.
 ///
 /// Cómo se logra el "vidrio", de abajo hacia arriba:
@@ -39,9 +53,13 @@ class KumoGlassNavBar extends StatelessWidget {
     required this.destinations,
     required this.selectedIndex,
     required this.onDestinationSelected,
+    this.centerAction,
     this.visible = true,
     super.key,
   });
+
+  /// Botón destacado en medio de los destinos. Opcional.
+  final KumoNavAction? centerAction;
 
   final List<KumoNavDestination> destinations;
   final int selectedIndex;
@@ -133,20 +151,77 @@ class KumoGlassNavBar extends StatelessWidget {
                   height: height,
                   child: Padding(
                     padding: const EdgeInsets.all(6),
-                    child: Row(
-                      children: [
-                        for (final (i, destination) in destinations.indexed)
-                          Expanded(
-                            child: _GlassNavItem(
-                              destination: destination,
-                              selected: i == selectedIndex,
-                              onTap: () => onDestinationSelected(i),
-                            ),
-                          ),
-                      ],
-                    ),
+                    child: Row(children: _buildItems()),
                   ),
                 ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// Los destinos, con la acción central (si hay) justo a la mitad.
+  List<Widget> _buildItems() {
+    final items = <Widget>[
+      for (final (i, destination) in destinations.indexed)
+        Expanded(
+          child: _GlassNavItem(
+            destination: destination,
+            selected: i == selectedIndex,
+            onTap: () => onDestinationSelected(i),
+          ),
+        ),
+    ];
+    final action = centerAction;
+    if (action != null) {
+      items.insert(destinations.length ~/ 2, _GlassNavCenterButton(action));
+    }
+    return items;
+  }
+}
+
+/// El botón central: un círculo lleno con el color primario, para que la
+/// acción más importante sea la más fácil de encontrar.
+class _GlassNavCenterButton extends StatelessWidget {
+  const new(this.action);
+
+  final KumoNavAction action;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 8),
+      child: Tooltip(
+        message: action.label,
+        child: Semantics(
+          button: true,
+          label: action.label,
+          onTap: action.onTap,
+          excludeSemantics: true,
+          child: GestureDetector(
+            onTap: () {
+              unawaited(HapticFeedback.lightImpact());
+              action.onTap();
+            },
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                color: scheme.primary,
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: scheme.primary.withValues(alpha: 0.35),
+                    blurRadius: 12,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: SizedBox.square(
+                dimension: 52,
+                child: Icon(action.icon, color: scheme.onPrimary, size: 26),
               ),
             ),
           ),

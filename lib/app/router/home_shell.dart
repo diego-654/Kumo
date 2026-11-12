@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:kumo/app/router/app_routes.dart';
 import 'package:kumo/core/widget/kumo_glass_nav_bar.dart';
 import 'package:kumo/features/heat_map/presentation/providers/heat_map_providers.dart';
 import 'package:material_ui/material_ui.dart';
@@ -47,6 +48,12 @@ class HomeShell extends ConsumerWidget {
         destinations: _destinations,
         selectedIndex: currentIndex,
         visible: !zoneSheetOpen,
+        // La acción central de Kumo, a un toque desde cualquier pestaña.
+        centerAction: KumoNavAction(
+          icon: Icons.photo_camera,
+          label: 'Registrar un momento',
+          onTap: () => context.push(AppRoutes.newMoment),
+        ),
         onDestinationSelected: (index) => navigationShell.goBranch(
           index,
           // Tocar el tab activo vuelve a su pantalla inicial.
