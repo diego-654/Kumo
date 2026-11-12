@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:kumo/app/router/app_routes.dart';
@@ -10,6 +9,7 @@ import 'package:kumo/features/moments/domain/entities/moment.dart';
 import 'package:kumo/features/moments/domain/entities/sentiment.dart';
 import 'package:kumo/features/moments/presentation/extensions/emotion_style.dart';
 import 'package:kumo/features/moments/presentation/extensions/moment_photo_image.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// Detalle de un lugar (boceto 6): fotos, cómo se siente la gente ahí y
 /// sus momentos. Se abre al tocar un lugar en la hoja de la zona.
@@ -67,7 +67,7 @@ class _PlaceView extends StatefulWidget {
 }
 
 class _PlaceViewState extends State<_PlaceView> {
-  var _tab = _Tab.momentos;
+  _Tab _tab = _Tab.momentos;
 
   @override
   Widget build(BuildContext context) {

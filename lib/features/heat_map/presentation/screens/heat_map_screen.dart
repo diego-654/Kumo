@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:flutter/material.dart';
 import 'package:flutter_map_animations/flutter_map_animations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -17,6 +16,7 @@ import 'package:kumo/features/heat_map/presentation/widgets/my_location_layer.da
 import 'package:kumo/features/heat_map/presentation/widgets/pending_moments_layer.dart';
 import 'package:kumo/features/heat_map/presentation/widgets/zone_summary_sheet.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// Mapa de calor emocional: zonas pintadas por la emoción dominante. Al
 /// tocar una zona sube su resumen (boceto 5) sin salir del mapa.

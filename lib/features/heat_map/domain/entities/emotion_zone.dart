@@ -1,8 +1,8 @@
-import 'package:flutter/material.dart';
 import 'package:kumo/core/location/geo_point.dart';
 import 'package:kumo/features/moments/domain/entities/moment.dart';
 import 'package:kumo/features/moments/domain/entities/moment_photo.dart';
 import 'package:kumo/features/moments/domain/entities/sentiment.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// Un lugar dentro de una zona: su nombre, la emoción que más se repite
 /// ahí, cuántos momentos tiene y una foto de portada si alguno trae foto

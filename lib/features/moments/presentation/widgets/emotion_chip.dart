@@ -1,7 +1,7 @@
-import 'package:flutter/material.dart';
 import 'package:kumo/core/widget/label_chip.dart';
 import 'package:kumo/features/moments/domain/entities/sentiment.dart';
 import 'package:kumo/features/moments/presentation/extensions/emotion_style.dart';
+import 'package:material_ui/material_ui.dart';
 
 class EmotionChip extends StatelessWidget {
   const new({required this.emotion, super.key});

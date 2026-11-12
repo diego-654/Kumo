@@ -1,6 +1,6 @@
-import 'package:flutter/material.dart';
 import 'package:kumo/features/moments/domain/entities/sentiment.dart';
 import 'package:kumo/features/moments/presentation/extensions/emotion_style.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// Barra con el reparto de emociones y su leyenda en dos columnas. La usan
 /// la hoja de zona (boceto 5) y el detalle del lugar (boceto 6).

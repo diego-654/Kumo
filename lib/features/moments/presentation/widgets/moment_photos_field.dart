@@ -1,7 +1,7 @@
-import 'package:flutter/material.dart';
 import 'package:kumo/core/widget/photo_placeholder.dart';
 import 'package:kumo/features/moments/domain/entities/moment_photo.dart';
 import 'package:kumo/features/moments/presentation/extensions/moment_photo_image.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// Sección de fotos del formulario (pantalla 8 del boceto, con varias fotos).
 ///

@@ -1,9 +1,9 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:kumo/app/router/app_routes.dart';
 import 'package:kumo/features/moments/presentation/providers/moments_providers.dart';
 import 'package:kumo/features/moments/presentation/widgets/moment_card.dart';
+import 'package:material_ui/material_ui.dart';
 
 class MomentsScreen extends ConsumerWidget {
   const new({super.key});

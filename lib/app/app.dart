@@ -1,7 +1,7 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:kumo/app/router/app_router.dart';
 import 'package:kumo/core/theme/app_theme.dart';
+import 'package:material_ui/material_ui.dart';
 
 class KumoApp extends ConsumerWidget {
   const new({super.key});

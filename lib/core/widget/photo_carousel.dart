@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
 import 'package:kumo/core/widget/photo_placeholder.dart';
+import 'package:material_ui/material_ui.dart';
 
 class PhotoCarousel extends StatefulWidget {
   const new({required this.images, super.key});

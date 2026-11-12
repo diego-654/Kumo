@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:kumo/core/widget/kumo_sheet.dart';
 import 'package:kumo/core/widget/photo_placeholder.dart';
 import 'package:kumo/core/widget/section_title.dart';
@@ -7,6 +6,7 @@ import 'package:kumo/features/heat_map/presentation/widgets/emotion_breakdown.da
 import 'package:kumo/features/moments/domain/entities/sentiment.dart';
 import 'package:kumo/features/moments/presentation/extensions/emotion_style.dart';
 import 'package:kumo/features/moments/presentation/extensions/moment_photo_image.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// Hoja inferior con el resumen de una zona (boceto 5). Es persistente:
 /// vive encima del mapa en un `Stack`, se arrastra entre alturas y deja
