@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:kumo/app/router/app_routes.dart';
 import 'package:kumo/app/router/home_shell.dart';
 import 'package:kumo/features/heat_map/presentation/screens/heat_map_screen.dart';
+import 'package:kumo/features/heat_map/presentation/screens/place_detail_screen.dart';
 import 'package:kumo/features/moments/presentation/screens/moment_detail_screen.dart';
 import 'package:kumo/features/moments/presentation/screens/moment_form_screen.dart';
 import 'package:kumo/features/moments/presentation/screens/moments_screen.dart';
@@ -21,6 +22,13 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: AppRoutes.newMoment,
         builder: (context, state) => const MomentFormScreen(),
+      ),
+      // También fuera del shell: el detalle del lugar tapa el navbar.
+      // go_router ya entrega el parámetro decodificado.
+      GoRoute(
+        path: AppRoutes.placeDetailPath,
+        builder: (context, state) =>
+            PlaceDetailScreen(placeName: state.pathParameters['id']!),
       ),
       // Cada rama conserva su propio stack de navegación al cambiar de tab.
       StatefulShellRoute.indexedStack(

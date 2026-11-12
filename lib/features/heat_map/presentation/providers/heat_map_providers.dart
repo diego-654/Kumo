@@ -14,6 +14,16 @@ final mapMomentsProvider = FutureProvider<List<Moment>>((ref) async {
       .toList();
 });
 
+/// Momentos públicos de un lugar, del más reciente al más antiguo (boceto
+/// 6). Por ahora el lugar se identifica por su nombre: no hay entidad
+/// `Place` con id propio todavía.
+final FutureProviderFamily<List<Moment>, String> placeMomentsProvider =
+    FutureProvider.family<List<Moment>, String>((ref, placeName) async {
+      final moments = await ref.watch(mapMomentsProvider.future);
+      return moments.where((m) => m.placeName == placeName).toList()
+        ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    });
+
 /// Zonas para un tamaño de celda. Riverpod guarda cada tamaño en caché,
 /// así que al volver a un zoom ya visitado no recalcula.
 final FutureProviderFamily<List<EmotionZone>, double> emotionZonesProvider =
