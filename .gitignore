@@ -46,3 +46,6 @@ app.*.map.json
 
 # Widget Preview related
 .widget_preview/
+
+# Salidas de compilación en cualquier carpeta (p. ej. android/build)
+**/build/
