@@ -43,7 +43,7 @@ class MomentFormScreen extends ConsumerWidget {
                 const SizedBox(height: 24),
                 MomentPlaceField(
                   placeName: form.placeName,
-                  detail: _locationDetail(form.locationStatus),
+                  detail: _locationDetail(form),
                   detailActionLabel: location.label,
                   onDetailAction: location.onPressed,
                   onChange: () =>
@@ -108,14 +108,19 @@ class MomentFormScreen extends ConsumerWidget {
 
   /// Texto que explica qué pasa con el GPS.
   /// `null` deja el texto por defecto del campo.
-  String? _locationDetail(LocationStatus status) => switch (status) {
-    LocationStatus.idle => null,
-    LocationStatus.loading => 'Buscando tu ubicación…',
-    LocationStatus.found => 'Ubicación lista · se mostrará en el mapa',
-    LocationStatus.unavailable ||
-    LocationStatus.denied ||
-    LocationStatus.deniedForever => 'Sin ubicación · no aparecerá en el mapa',
-  };
+  String? _locationDetail(MomentFormState form) =>
+      switch (form.locationStatus) {
+        LocationStatus.idle => null,
+        LocationStatus.loading => 'Buscando tu ubicación…',
+        // El mapa solo muestra momentos públicos.
+        LocationStatus.found when !form.isPublic =>
+          'Ubicación lista · privado, no sale en el mapa',
+        LocationStatus.found => 'Ubicación lista · se mostrará en el mapa',
+        LocationStatus.unavailable ||
+        LocationStatus.denied ||
+        LocationStatus.deniedForever =>
+          'Sin ubicación · no aparecerá en el mapa',
+      };
 
   /// Qué puede hacer el usuario para conseguir la ubicación, si algo.
   ({String? label, VoidCallback? onPressed}) _locationAction(

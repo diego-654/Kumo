@@ -7,11 +7,24 @@ import 'package:kumo/features/heat_map/domain/services/emotion_zone_builder.dart
 import 'package:kumo/features/moments/domain/entities/moment.dart';
 import 'package:kumo/features/moments/presentation/providers/moments_providers.dart';
 
-final mapMomentsProvider = FutureProvider<List<Moment>>((ref) async {
+/// Momentos que pueden ir en el mapa: públicos y con ubicación. Depende de
+/// `momentsProvider`, así que al guardar un momento el mapa se refresca.
+final _locatedMomentsProvider = FutureProvider<List<Moment>>((ref) async {
   final moments = await ref.watch(momentsProvider.future);
-  return moments
-      .where((m) => m.isPublic && m.location != null && m.sentiment != null)
-      .toList();
+  return moments.where((m) => m.isPublic && m.location != null).toList();
+});
+
+/// Momentos ya analizados por la IA: son los únicos que forman zonas,
+/// porque las zonas solo cuentan emociones reales.
+final mapMomentsProvider = FutureProvider<List<Moment>>((ref) async {
+  final moments = await ref.watch(_locatedMomentsProvider.future);
+  return moments.where((m) => m.sentiment != null).toList();
+});
+
+/// Momentos aún sin emoción: se ven como punto gris "pendiente de análisis".
+final pendingMapMomentsProvider = FutureProvider<List<Moment>>((ref) async {
+  final moments = await ref.watch(_locatedMomentsProvider.future);
+  return moments.where((m) => m.sentiment == null).toList();
 });
 
 /// Momentos públicos de un lugar, del más reciente al más antiguo (boceto

@@ -14,6 +14,7 @@ import 'package:kumo/features/heat_map/presentation/providers/heat_map_providers
 import 'package:kumo/features/heat_map/presentation/widgets/emotion_zones_layer.dart';
 import 'package:kumo/features/heat_map/presentation/widgets/map_view.dart';
 import 'package:kumo/features/heat_map/presentation/widgets/my_location_layer.dart';
+import 'package:kumo/features/heat_map/presentation/widgets/pending_moments_layer.dart';
 import 'package:kumo/features/heat_map/presentation/widgets/zone_summary_sheet.dart';
 import 'package:latlong2/latlong.dart';
 
@@ -157,7 +158,11 @@ class _HeatMapScreenState extends ConsumerState<HeatMapScreen>
               controller: _map.mapController,
               onTap: _onMapTap,
               onUserMove: () => _autoCenterPending = false,
-              layers: const [EmotionZonesLayer(), MyLocationLayer()],
+              layers: const [
+                EmotionZonesLayer(),
+                PendingMomentsLayer(),
+                MyLocationLayer(),
+              ],
             ),
             // Arriba a la derecha: la hoja de zona sube desde abajo y lo
             // taparía si estuviera en la esquina inferior.
