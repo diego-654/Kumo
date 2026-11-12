@@ -2,6 +2,8 @@ import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart';
+import 'package:kumo/core/location/location_providers.dart';
+import 'package:kumo/core/location/location_service.dart';
 import 'package:kumo/features/moments/domain/entities/moment.dart';
 import 'package:kumo/features/moments/domain/entities/moment_photo.dart';
 import 'package:kumo/features/moments/presentation/providers/moment_form_state.dart';
@@ -30,7 +32,12 @@ class MomentFormNotifier extends Notifier<MomentFormState> {
   @override
   MomentFormState build() {
     final id = momentId;
-    if (id == null) return const MomentFormState();
+    if (id == null) {
+      // Momento nuevo: buscamos dónde está el usuario mientras completa
+      // el resto del formulario.
+      unawaited(_findLocation());
+      return const MomentFormState(locationStatus: LocationStatus.loading);
+    }
 
     // `build` no puede ser async: arrancamos la carga y mientras tanto la
     // pantalla muestra un indicador.
@@ -49,7 +56,49 @@ class MomentFormNotifier extends Notifier<MomentFormState> {
             placeName: moment.placeName,
             note: moment.note,
             isPublic: moment.isPublic,
+            // Al editar se conserva la ubicación original: no se pide GPS,
+            // porque el usuario puede estar ya en otro sitio.
+            location: moment.location,
+            locationStatus: moment.location == null
+                ? LocationStatus.idle
+                : LocationStatus.found,
           );
+  }
+
+  // --- Ubicación -----------------------------------------------------------
+
+  /// Vuelve a pedir el GPS (p. ej. tras encenderlo o conceder el permiso).
+  Future<void> retryLocation() {
+    state = state.copyWith(locationStatus: LocationStatus.loading);
+    return _findLocation();
+  }
+
+  /// Abre los Ajustes de la app cuando el permiso se negó para siempre.
+  Future<void> openLocationSettings() async {
+    await ref.read(locationServiceProvider).openAppSettings();
+  }
+
+  /// Ojo: no toca `state` antes del primer `await`, porque se llama desde
+  /// `build`, cuando el estado aún no existe.
+  Future<void> _findLocation() async {
+    final result = await ref.read(locationServiceProvider).currentLocation();
+    // El GPS puede tardar: el usuario pudo salir de la pantalla.
+    if (!ref.mounted) return;
+    state = switch (result) {
+      LocationFound(:final point) => state.copyWith(
+        location: point,
+        locationStatus: LocationStatus.found,
+      ),
+      LocationPermissionDenied() => state.copyWith(
+        locationStatus: LocationStatus.denied,
+      ),
+      LocationPermissionDeniedForever() => state.copyWith(
+        locationStatus: LocationStatus.deniedForever,
+      ),
+      LocationServiceDisabled() || LocationUnavailable() => state.copyWith(
+        locationStatus: LocationStatus.unavailable,
+      ),
+    };
   }
 
   // --- Fotos ---------------------------------------------------------------
@@ -131,6 +180,7 @@ class MomentFormNotifier extends Notifier<MomentFormState> {
         note: note,
         photos: state.photos,
         isPublic: state.isPublic,
+        location: state.location,
       );
     }
     return Moment(
@@ -140,6 +190,7 @@ class MomentFormNotifier extends Notifier<MomentFormState> {
       createdAt: DateTime.now(),
       photos: state.photos,
       isPublic: state.isPublic,
+      location: state.location,
     );
   }
 

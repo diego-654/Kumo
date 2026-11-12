@@ -1,5 +1,23 @@
 import 'package:flutter/foundation.dart';
+import 'package:kumo/core/location/geo_point.dart';
 import 'package:kumo/features/moments/domain/entities/moment_photo.dart';
+
+/// En qué va la búsqueda de la ubicación GPS del momento.
+enum LocationStatus {
+  /// No se pidió (p. ej. al editar un momento que no tenía ubicación).
+  idle,
+  loading,
+  found,
+
+  /// GPS apagado o sin señal: se puede reintentar.
+  unavailable,
+
+  /// El usuario negó el permiso: se le puede volver a preguntar.
+  denied,
+
+  /// Negado para siempre: solo se arregla desde Ajustes.
+  deniedForever,
+}
 
 /// Borrador de la pantalla "Nuevo momento" / "Editar momento".
 ///
@@ -13,6 +31,8 @@ class MomentFormState {
     this.isPublic = true,
     this.isLoading = false,
     this.isSaving = false,
+    this.location,
+    this.locationStatus = LocationStatus.idle,
   });
 
   static const int maxPhotos = 5;
@@ -33,6 +53,11 @@ class MomentFormState {
   /// Mientras se guarda: evita dobles toques en el botón.
   final bool isSaving;
 
+  /// Dónde se creó el momento. Opcional: sin ella se guarda igual, pero no
+  /// aparece en el mapa.
+  final GeoPoint? location;
+  final LocationStatus locationStatus;
+
   bool get canAddPhotos => photos.length < maxPhotos;
   int get remainingPhotos => maxPhotos - photos.length;
 
@@ -50,6 +75,8 @@ class MomentFormState {
     bool? isPublic,
     bool? isLoading,
     bool? isSaving,
+    GeoPoint? location,
+    LocationStatus? locationStatus,
   }) {
     return MomentFormState(
       photos: photos ?? this.photos,
@@ -58,6 +85,9 @@ class MomentFormState {
       isPublic: isPublic ?? this.isPublic,
       isLoading: isLoading ?? this.isLoading,
       isSaving: isSaving ?? this.isSaving,
+      // Con `??` no se puede volver a `null`; hoy no hace falta borrarla.
+      location: location ?? this.location,
+      locationStatus: locationStatus ?? this.locationStatus,
     );
   }
 
@@ -69,7 +99,9 @@ class MomentFormState {
       other.note == note &&
       other.isPublic == isPublic &&
       other.isLoading == isLoading &&
-      other.isSaving == isSaving;
+      other.isSaving == isSaving &&
+      other.location == location &&
+      other.locationStatus == locationStatus;
 
   @override
   int get hashCode => Object.hash(
@@ -79,5 +111,7 @@ class MomentFormState {
     isPublic,
     isLoading,
     isSaving,
+    location,
+    locationStatus,
   );
 }

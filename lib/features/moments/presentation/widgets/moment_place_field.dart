@@ -9,6 +9,8 @@ class MomentPlaceField extends StatelessWidget {
     required this.placeName,
     required this.onChange,
     this.detail,
+    this.detailActionLabel,
+    this.onDetailAction,
     super.key,
   });
 
@@ -16,6 +18,12 @@ class MomentPlaceField extends StatelessWidget {
 
   /// Línea secundaria, por ejemplo "Restaurante · a 120 m".
   final String? detail;
+
+  /// Acción opcional bajo [detail], p. ej. "Reintentar" si falló el GPS.
+  /// Solo se muestra si llegan ambos.
+  final String? detailActionLabel;
+  final VoidCallback? onDetailAction;
+
   final VoidCallback onChange;
 
   @override
@@ -23,6 +31,8 @@ class MomentPlaceField extends StatelessWidget {
     final textTheme = Theme.of(context).textTheme;
     final colors = Theme.of(context).colorScheme;
     final hasPlace = placeName.trim().isNotEmpty;
+    final actionLabel = detailActionLabel;
+    final onAction = onDetailAction;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -77,6 +87,17 @@ class MomentPlaceField extends StatelessWidget {
                         color: colors.onSurfaceVariant,
                       ),
                     ),
+                    if (actionLabel != null && onAction != null)
+                      TextButton(
+                        onPressed: onAction,
+                        // Compacto y alineado con el texto de arriba.
+                        style: TextButton.styleFrom(
+                          padding: EdgeInsets.zero,
+                          minimumSize: const Size(0, 32),
+                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        ),
+                        child: Text(actionLabel),
+                      ),
                   ],
                 ),
               ),
