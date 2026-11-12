@@ -60,5 +60,8 @@ class SelectedZoneNotifier extends Notifier<EmotionZone?> {
   @override
   EmotionZone? build() => null;
 
-  void select(EmotionZone? zone) => state = zone;
+  // Getter + setter (lints use_setters_to_change_properties y
+  // avoid_setters_without_getters): `notifier.zone = x` en vez de `select(x)`.
+  EmotionZone? get zone => state;
+  set zone(EmotionZone? zone) => state = zone;
 }
