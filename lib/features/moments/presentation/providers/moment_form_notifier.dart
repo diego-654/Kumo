@@ -81,7 +81,10 @@ class MomentFormNotifier extends Notifier<MomentFormState> {
   /// Ojo: no toca `state` antes del primer `await`, porque se llama desde
   /// `build`, cuando el estado aún no existe.
   Future<void> _findLocation() async {
-    final result = await ref.read(locationServiceProvider).currentLocation();
+    // Precisa: es la posición que queda guardada con el momento.
+    final result = await ref
+        .read(locationServiceProvider)
+        .currentLocation(precise: true);
     // El GPS puede tardar: el usuario pudo salir de la pantalla.
     if (!ref.mounted) return;
     state = switch (result) {

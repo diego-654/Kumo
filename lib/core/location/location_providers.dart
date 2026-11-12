@@ -6,8 +6,13 @@ final locationServiceProvider = Provider<LocationService>(
   (ref) => LocationService(),
 );
 
-/// Dónde está el usuario ahora. Se guarda en caché: para pedirla de nuevo
-/// (botón "centrar en mí") se hace `ref.invalidate(currentLocationProvider)`.
-final currentLocationProvider = FutureProvider<LocationResult>(
-  (ref) => ref.watch(locationServiceProvider).currentLocation(),
-);
+/// Dónde está el usuario, "rápido primero, preciso después": emite al
+/// instante la última posición conocida (si la hay) y luego una nueva.
+/// Para pedirla otra vez: `ref.invalidate(currentLocationProvider)`; mientras
+/// se recarga, `value` conserva la anterior y el punto azul no desaparece.
+final currentLocationProvider = StreamProvider<LocationResult>((ref) async* {
+  final service = ref.watch(locationServiceProvider);
+  final last = await service.lastKnownLocation();
+  if (last != null) yield LocationFound(last);
+  yield await service.currentLocation();
+});

@@ -41,12 +41,21 @@ class _HeatMapScreenState extends ConsumerState<HeatMapScreen>
   /// Zoom al centrar en el usuario: se ve el barrio.
   static const double _myLocationZoom = 15;
 
-  /// Al abrir el mapa se centra en el usuario una sola vez, y solo si aún
-  /// no lo movió él: nunca le quitamos el mapa de las manos.
-  bool _autoCenterPending = true;
+  /// Si la posición nueva se aleja menos que esto, no movemos la cámara.
+  static const double _recenterMeters = 30;
 
-  /// `true` mientras esperamos el GPS tras tocar "centrar en mí".
-  bool _centerRequested = false;
+  static const _distance = Distance();
+
+  /// La cámara sigue al usuario hasta que él mueva el mapa con el dedo:
+  /// nunca le quitamos el mapa de las manos. Arranca en `true` para
+  /// centrar al abrir, y el botón la vuelve a activar.
+  bool _followUser = true;
+
+  /// Dónde centramos la última vez, para no repetir el movimiento.
+  LatLng? _lastCentered;
+
+  /// Solo avisamos de errores si el usuario tocó el botón.
+  bool _fromButton = false;
 
   @override
   void dispose() {
@@ -77,30 +86,39 @@ class _HeatMapScreenState extends ConsumerState<HeatMapScreen>
     );
   }
 
-  /// "Centrar en mí": pide una posición nueva; al llegar, `_onLocation`
-  /// mueve la cámara.
+  /// "Centrar en mí": centra YA con la posición que tengamos y, en paralelo,
+  /// pide una nueva. Si la nueva está lejos, `_onLocation` corrige.
   void _centerOnMe() {
-    _centerRequested = true;
+    _followUser = true;
+    _fromButton = true;
+    if (ref.read(currentLocationProvider).value case LocationFound(
+      :final point,
+    )) {
+      _moveTo(LatLng(point.latitude, point.longitude));
+    }
     ref.invalidate(currentLocationProvider);
   }
 
-  void _onLocation(LocationResult result) {
-    final wanted = _centerRequested || _autoCenterPending;
-    final fromButton = _centerRequested;
-    _centerRequested = false;
-    _autoCenterPending = false;
-    if (!wanted) return;
+  void _moveTo(LatLng dest) {
+    _lastCentered = dest;
+    unawaited(_map.animateTo(dest: dest, zoom: _myLocationZoom));
+  }
 
+  /// Llega dos veces por búsqueda: la última conocida y luego la nueva.
+  void _onLocation(LocationResult result) {
+    if (result case LocationFound(:final point)) {
+      final dest = LatLng(point.latitude, point.longitude);
+      final last = _lastCentered;
+      final farEnough = last == null || _distance(last, dest) > _recenterMeters;
+      if (_followUser && farEnough) _moveTo(dest);
+      return;
+    }
+
+    // Al abrir el mapa no molestamos con avisos; solo si lo pidió.
+    if (!_fromButton) return;
+    _fromButton = false;
     switch (result) {
-      case LocationFound(:final point):
-        unawaited(
-          _map.animateTo(
-            dest: LatLng(point.latitude, point.longitude),
-            zoom: _myLocationZoom,
-          ),
-        );
-      // Al abrir el mapa no molestamos con avisos; solo si lo pidió.
-      case _ when !fromButton:
+      case LocationFound():
         break;
       case LocationPermissionDeniedForever():
         _showLocationError(
@@ -142,7 +160,9 @@ class _HeatMapScreenState extends ConsumerState<HeatMapScreen>
   @override
   Widget build(BuildContext context) {
     final selected = ref.watch(selectedZoneProvider);
-    final locating = ref.watch(currentLocationProvider).isLoading;
+    final location = ref.watch(currentLocationProvider);
+    // Spinner solo si aún no tenemos ninguna posición que enseñar.
+    final locating = location.isLoading && location.value is! LocationFound;
 
     // Cada resultado nuevo del GPS pasa por aquí (también tras invalidar).
     ref.listen(currentLocationProvider, (_, next) {
@@ -157,7 +177,7 @@ class _HeatMapScreenState extends ConsumerState<HeatMapScreen>
             MapView(
               controller: _map.mapController,
               onTap: _onMapTap,
-              onUserMove: () => _autoCenterPending = false,
+              onUserMove: () => _followUser = false,
               layers: const [
                 EmotionZonesLayer(),
                 PendingMomentsLayer(),

@@ -41,13 +41,22 @@ final class LocationUnavailable extends LocationResult {
 /// Vive en `core/` porque lo usan momentos (al crear) y el mapa.
 /// En tests se reemplaza por un fake vía `locationServiceProvider`.
 class LocationService {
-  /// Precisión alta (`LocationAccuracy.high` ya es el valor por defecto),
-  /// pero sin esperar eternamente al GPS.
-  static const LocationSettings _settings = LocationSettings(
+  /// Rápido: precisión media (wifi/antenas, ~100 m) y poco tiempo de espera.
+  /// Basta para centrar el mapa.
+  static const LocationSettings _fast = LocationSettings(
+    accuracy: LocationAccuracy.medium,
+    timeLimit: Duration(seconds: 5),
+  );
+
+  /// Preciso: GPS de verdad (`high` es el valor por defecto). Tarda más,
+  /// pero es lo que se guarda con el momento.
+  static const LocationSettings _precise = LocationSettings(
     timeLimit: Duration(seconds: 10),
   );
 
-  Future<LocationResult> currentLocation() async {
+  /// Pide una posición nueva. Con [precise] usa el GPS (más lento);
+  /// sin él, una aproximada que llega antes.
+  Future<LocationResult> currentLocation({bool precise = false}) async {
     if (!await Geolocator.isLocationServiceEnabled()) {
       return const LocationServiceDisabled();
     }
@@ -70,7 +79,7 @@ class LocationService {
 
     try {
       final position = await Geolocator.getCurrentPosition(
-        locationSettings: _settings,
+        locationSettings: precise ? _precise : _fast,
       );
       return LocationFound(_toGeoPoint(position));
     } on TimeoutException {
@@ -82,6 +91,24 @@ class LocationService {
     } on LocationServiceDisabledException {
       // El usuario apagó el GPS mientras esperábamos.
       return const LocationServiceDisabled();
+    }
+  }
+
+  /// La última posición que el teléfono recuerda: llega al instante, pero
+  /// puede ser vieja. Nunca muestra el diálogo de permisos: si no hay
+  /// permiso todavía, devuelve `null` y ya lo pedirá [currentLocation].
+  Future<GeoPoint?> lastKnownLocation() async {
+    final permission = await Geolocator.checkPermission();
+    if (permission != LocationPermission.whileInUse &&
+        permission != LocationPermission.always) {
+      return null;
+    }
+    try {
+      final last = await Geolocator.getLastKnownPosition();
+      return last == null ? null : _toGeoPoint(last);
+    } on Exception {
+      // Algunas plataformas (web) no la tienen: no es un error grave.
+      return null;
     }
   }
 
