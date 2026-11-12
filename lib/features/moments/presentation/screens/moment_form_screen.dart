@@ -21,6 +21,7 @@ class MomentFormScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final form = ref.watch(momentFormProvider(momentId));
     final notifier = ref.read(momentFormProvider(momentId).notifier);
+    final location = _locationAction(form.locationStatus, notifier);
 
     return Scaffold(
       appBar: AppBar(
@@ -42,6 +43,9 @@ class MomentFormScreen extends ConsumerWidget {
                 const SizedBox(height: 24),
                 MomentPlaceField(
                   placeName: form.placeName,
+                  detail: _locationDetail(form),
+                  detailActionLabel: location.label,
+                  onDetailAction: location.onPressed,
                   onChange: () =>
                       _askPlaceName(context, notifier, form.placeName),
                 ),
@@ -102,7 +106,43 @@ class MomentFormScreen extends ConsumerWidget {
     }
   }
 
-  /// Temporal hasta tener GPS y buscador: escribir el lugar a mano.
+  /// Texto que explica qué pasa con el GPS.
+  /// `null` deja el texto por defecto del campo.
+  String? _locationDetail(MomentFormState form) =>
+      switch (form.locationStatus) {
+        LocationStatus.idle => null,
+        LocationStatus.loading => 'Buscando tu ubicación…',
+        // El mapa solo muestra momentos públicos.
+        LocationStatus.found when !form.isPublic =>
+          'Ubicación lista · privado, no sale en el mapa',
+        LocationStatus.found => 'Ubicación lista · se mostrará en el mapa',
+        LocationStatus.unavailable ||
+        LocationStatus.denied ||
+        LocationStatus.deniedForever =>
+          'Sin ubicación · no aparecerá en el mapa',
+      };
+
+  /// Qué puede hacer el usuario para conseguir la ubicación, si algo.
+  ({String? label, VoidCallback? onPressed}) _locationAction(
+    LocationStatus status,
+    MomentFormNotifier notifier,
+  ) => switch (status) {
+    LocationStatus.unavailable || LocationStatus.denied => (
+      label: 'Reintentar',
+      onPressed: notifier.retryLocation,
+    ),
+    // Negado para siempre: el diálogo del sistema ya no sale; toca Ajustes.
+    LocationStatus.deniedForever => (
+      label: 'Abrir ajustes',
+      onPressed: notifier.openLocationSettings,
+    ),
+    LocationStatus.idle ||
+    LocationStatus.loading ||
+    LocationStatus.found => (label: null, onPressed: null),
+  };
+
+  /// Temporal hasta tener buscador de lugares: escribir el nombre a mano.
+  /// (Las coordenadas ya llegan solas por GPS.)
   Future<void> _askPlaceName(
     BuildContext context,
     MomentFormNotifier notifier,

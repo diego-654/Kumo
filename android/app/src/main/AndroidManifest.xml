@@ -1,4 +1,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Internet: sin él los mosaicos del mapa no cargan en release. -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <!-- Ubicación mientras se usa la app, para situar el momento en el mapa. -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <application
         android:label="kumo"
         android:name="${applicationName}"

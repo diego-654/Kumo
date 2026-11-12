@@ -17,6 +17,7 @@ class MapView extends StatelessWidget {
     this.layers = const [],
     this.controller,
     this.onTap,
+    this.onUserMove,
   });
 
   static const _cdmx = LatLng(19.4326, -99.1332);
@@ -47,6 +48,9 @@ class MapView extends StatelessWidget {
   /// Avisa dónde se tocó el mapa. Qué hacer con eso lo decide la pantalla.
   final void Function(LatLng point)? onTap;
 
+  /// Avisa cuando el usuario mueve el mapa con el dedo (no con código).
+  final VoidCallback? onUserMove;
+
   @override
   Widget build(BuildContext context) {
     const hasKey = _mapTilerKey != '';
@@ -59,6 +63,11 @@ class MapView extends StatelessWidget {
         minZoom: 3,
         maxZoom: 18,
         onTap: onTap == null ? null : (_, point) => onTap!(point),
+        onPositionChanged: onUserMove == null
+            ? null
+            : (_, hasGesture) {
+                if (hasGesture) onUserMove!();
+              },
       ),
       children: [
         if (hasKey)

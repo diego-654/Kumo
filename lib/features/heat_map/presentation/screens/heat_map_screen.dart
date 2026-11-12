@@ -1,14 +1,20 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_map_animations/flutter_map_animations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:kumo/app/router/app_routes.dart';
 import 'package:kumo/core/location/geo_point.dart';
+import 'package:kumo/core/location/location_providers.dart';
+import 'package:kumo/core/location/location_service.dart';
 import 'package:kumo/features/heat_map/domain/entities/emotion_zone.dart';
 import 'package:kumo/features/heat_map/domain/services/emotion_zone_builder.dart';
 import 'package:kumo/features/heat_map/presentation/providers/heat_map_providers.dart';
 import 'package:kumo/features/heat_map/presentation/widgets/emotion_zones_layer.dart';
 import 'package:kumo/features/heat_map/presentation/widgets/map_view.dart';
+import 'package:kumo/features/heat_map/presentation/widgets/my_location_layer.dart';
+import 'package:kumo/features/heat_map/presentation/widgets/pending_moments_layer.dart';
 import 'package:kumo/features/heat_map/presentation/widgets/zone_summary_sheet.dart';
 import 'package:latlong2/latlong.dart';
 
@@ -31,6 +37,25 @@ class _HeatMapScreenState extends ConsumerState<HeatMapScreen>
     curve: Curves.easeOutCubic,
     cancelPreviousAnimations: true,
   );
+
+  /// Zoom al centrar en el usuario: se ve el barrio.
+  static const double _myLocationZoom = 15;
+
+  /// Si la posición nueva se aleja menos que esto, no movemos la cámara.
+  static const double _recenterMeters = 30;
+
+  static const _distance = Distance();
+
+  /// La cámara sigue al usuario hasta que él mueva el mapa con el dedo:
+  /// nunca le quitamos el mapa de las manos. Arranca en `true` para
+  /// centrar al abrir, y el botón la vuelve a activar.
+  bool _followUser = true;
+
+  /// Dónde centramos la última vez, para no repetir el movimiento.
+  LatLng? _lastCentered;
+
+  /// Solo avisamos de errores si el usuario tocó el botón.
+  bool _fromButton = false;
 
   @override
   void dispose() {
@@ -61,9 +86,89 @@ class _HeatMapScreenState extends ConsumerState<HeatMapScreen>
     );
   }
 
+  /// "Centrar en mí": centra YA con la posición que tengamos y, en paralelo,
+  /// pide una nueva. Si la nueva está lejos, `_onLocation` corrige.
+  void _centerOnMe() {
+    _followUser = true;
+    _fromButton = true;
+    if (ref.read(currentLocationProvider).value case LocationFound(
+      :final point,
+    )) {
+      _moveTo(LatLng(point.latitude, point.longitude));
+    }
+    ref.invalidate(currentLocationProvider);
+  }
+
+  void _moveTo(LatLng dest) {
+    _lastCentered = dest;
+    unawaited(_map.animateTo(dest: dest, zoom: _myLocationZoom));
+  }
+
+  /// Llega dos veces por búsqueda: la última conocida y luego la nueva.
+  void _onLocation(LocationResult result) {
+    if (result case LocationFound(:final point)) {
+      final dest = LatLng(point.latitude, point.longitude);
+      final last = _lastCentered;
+      final farEnough = last == null || _distance(last, dest) > _recenterMeters;
+      if (_followUser && farEnough) _moveTo(dest);
+      return;
+    }
+
+    // Al abrir el mapa no molestamos con avisos; solo si lo pidió.
+    if (!_fromButton) return;
+    _fromButton = false;
+    switch (result) {
+      case LocationFound():
+        break;
+      case LocationPermissionDeniedForever():
+        _showLocationError(
+          'Activa el permiso de ubicación en Ajustes',
+          actionLabel: 'Ajustes',
+          onAction: () =>
+              unawaited(ref.read(locationServiceProvider).openAppSettings()),
+        );
+      case LocationPermissionDenied():
+        _showLocationError(
+          'Kumo necesita permiso para ver dónde estás',
+          actionLabel: 'Reintentar',
+          onAction: _centerOnMe,
+        );
+      case LocationServiceDisabled() || LocationUnavailable():
+        _showLocationError(
+          'No pudimos encontrar tu ubicación. ¿Está el GPS encendido?',
+          actionLabel: 'Reintentar',
+          onAction: _centerOnMe,
+        );
+    }
+  }
+
+  void _showLocationError(
+    String message, {
+    required String actionLabel,
+    required VoidCallback onAction,
+  }) {
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          content: Text(message),
+          action: SnackBarAction(label: actionLabel, onPressed: onAction),
+        ),
+      );
+  }
+
   @override
   Widget build(BuildContext context) {
     final selected = ref.watch(selectedZoneProvider);
+    final location = ref.watch(currentLocationProvider);
+    // Spinner solo si aún no tenemos ninguna posición que enseñar.
+    final locating = location.isLoading && location.value is! LocationFound;
+
+    // Cada resultado nuevo del GPS pasa por aquí (también tras invalidar).
+    ref.listen(currentLocationProvider, (_, next) {
+      final result = next.value;
+      if (!next.isLoading && result != null) _onLocation(result);
+    });
 
     return SafeArea(
       child: Scaffold(
@@ -72,7 +177,29 @@ class _HeatMapScreenState extends ConsumerState<HeatMapScreen>
             MapView(
               controller: _map.mapController,
               onTap: _onMapTap,
-              layers: const [EmotionZonesLayer()],
+              onUserMove: () => _followUser = false,
+              layers: const [
+                EmotionZonesLayer(),
+                PendingMomentsLayer(),
+                MyLocationLayer(),
+              ],
+            ),
+            // Arriba a la derecha: la hoja de zona sube desde abajo y lo
+            // taparía si estuviera en la esquina inferior.
+            Positioned(
+              top: 12,
+              right: 12,
+              child: FloatingActionButton.small(
+                heroTag: 'center-on-me',
+                tooltip: 'Centrar en mí',
+                onPressed: locating ? null : _centerOnMe,
+                child: locating
+                    ? const SizedBox.square(
+                        dimension: 18,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Icon(Icons.my_location),
+              ),
             ),
             if (selected != null)
               // La key reinicia la hoja al cambiar de zona (vuelve al 30 %).
