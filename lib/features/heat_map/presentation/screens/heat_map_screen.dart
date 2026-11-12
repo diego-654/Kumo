@@ -72,7 +72,7 @@ class _HeatMapScreenState extends ConsumerState<HeatMapScreen>
     );
     final zones = ref.read(emotionZonesProvider(cellSize)).value ?? [];
     final tapped = zones.where((z) => z.cell == cell).firstOrNull;
-    ref.read(selectedZoneProvider.notifier).select(tapped);
+    ref.read(selectedZoneProvider.notifier).zone = tapped;
     if (tapped != null) await _focusOn(tapped);
   }
 

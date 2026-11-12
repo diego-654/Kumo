@@ -81,7 +81,7 @@ class InMemoryMomentsRepository implements MomentsRepository {
     ),
   ];
 
-  // TODO: paginar por cursor cuando haya backend.
+  // TODO(diego-654): paginar por cursor cuando haya backend.
   @override
   Future<List<Moment>> getMoments() async {
     final sorted = [..._moments]
