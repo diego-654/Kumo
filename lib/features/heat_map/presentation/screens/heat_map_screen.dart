@@ -170,7 +170,11 @@ class _HeatMapScreenState extends ConsumerState<HeatMapScreen>
       if (!next.isLoading && result != null) _onLocation(result);
     });
 
+    // bottom: false deja que el mapa llegue hasta abajo, detrás de la barra
+    // de vidrio. El padding inferior sigue en MediaQuery para quien lo
+    // necesite (la atribución del mapa y la hoja de zona lo usan).
     return SafeArea(
+      bottom: false,
       child: Scaffold(
         body: Stack(
           children: [

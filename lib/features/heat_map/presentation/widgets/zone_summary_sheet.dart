@@ -46,7 +46,15 @@ class ZoneSummarySheet extends StatelessWidget {
         return KumoSheetSurface(
           child: ListView(
             controller: scrollController,
-            padding: const EdgeInsets.fromLTRB(20, 0, 20, 28),
+            // La hoja baja hasta el borde y la barra flota encima. El
+            // padding inferior deja que lo último de la lista suba por
+            // encima de la barra al hacer scroll.
+            padding: EdgeInsets.fromLTRB(
+              20,
+              0,
+              20,
+              28 + MediaQuery.paddingOf(context).bottom,
+            ),
             children: [
               const KumoSheetHandle(),
               _ZoneHeader(zone: zone, places: places),

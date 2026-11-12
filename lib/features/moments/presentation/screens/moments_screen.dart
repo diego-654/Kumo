@@ -20,9 +20,14 @@ class MomentsScreen extends ConsumerWidget {
         data: (items) => items.isEmpty
             ? const _EmptyMoments()
             : ListView.separated(
-                padding: const EdgeInsets.symmetric(
-                  vertical: 16,
-                  horizontal: 8,
+                // Con un padding propio, ListView ya no suma el de
+                // MediaQuery: lo añadimos a mano para que la última
+                // tarjeta no quede detrás de la barra de vidrio.
+                padding: EdgeInsets.fromLTRB(
+                  8,
+                  16,
+                  8,
+                  16 + MediaQuery.paddingOf(context).bottom,
                 ),
                 itemCount: items.length,
                 separatorBuilder: (_, _) => const SizedBox(height: 4),
