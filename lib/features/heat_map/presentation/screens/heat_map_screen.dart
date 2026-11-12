@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map_animations/flutter_map_animations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:kumo/app/router/app_routes.dart';
 import 'package:kumo/core/location/geo_point.dart';
 import 'package:kumo/features/heat_map/domain/entities/emotion_zone.dart';
 import 'package:kumo/features/heat_map/domain/services/emotion_zone_builder.dart';
@@ -74,7 +76,11 @@ class _HeatMapScreenState extends ConsumerState<HeatMapScreen>
             ),
             if (selected != null)
               // La key reinicia la hoja al cambiar de zona (vuelve al 30 %).
-              ZoneSummarySheet(key: ValueKey(selected.cell), zone: selected),
+              ZoneSummarySheet(
+                key: ValueKey(selected.cell),
+                zone: selected,
+                onPlaceTap: (name) => context.push(AppRoutes.placeDetail(name)),
+              ),
           ],
         ),
       ),
