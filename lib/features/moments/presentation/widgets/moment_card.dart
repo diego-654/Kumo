@@ -1,9 +1,9 @@
-import 'package:flutter/material.dart';
 import 'package:kumo/core/extensions/date_time_extensions.dart';
 import 'package:kumo/core/widget/photo_placeholder.dart';
 import 'package:kumo/features/moments/domain/entities/moment.dart';
 import 'package:kumo/features/moments/presentation/extensions/moment_photo_image.dart';
 import 'package:kumo/features/moments/presentation/widgets/emotion_chip.dart';
+import 'package:material_ui/material_ui.dart';
 
 class MomentCard extends StatelessWidget {
   const new({required this.moment, this.onTap, super.key});

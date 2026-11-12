@@ -1,9 +1,9 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:kumo/core/location/location_providers.dart';
 import 'package:kumo/core/location/location_service.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// Punto azul con halo donde está el usuario. Va dentro de `FlutterMap`,
 /// después de las zonas para quedar encima. Sin ubicación no pinta nada.

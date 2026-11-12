@@ -1,10 +1,10 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:kumo/app/router/app_routes.dart';
 import 'package:kumo/features/heat_map/presentation/providers/heat_map_providers.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// Momentos que la IA aún no analizó: punto gris, más pequeño que el de
 /// "mi ubicación" y sin halo, para no confundirlos. No cuentan en las zonas.

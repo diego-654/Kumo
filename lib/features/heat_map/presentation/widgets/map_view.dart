@@ -1,6 +1,6 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// Mapa base de MapTiler con un estilo suave, para que destaquen las capas
 /// de emociones. Las capas extra (zonas, marcadores) llegan por [layers]

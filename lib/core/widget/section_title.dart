@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// Título de sección de los bocetos: 13 px, negrita, mayúsculas.
 class SectionTitle extends StatelessWidget {

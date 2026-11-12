@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:kumo/app/router/app_routes.dart';
@@ -8,6 +7,7 @@ import 'package:kumo/features/heat_map/presentation/screens/place_detail_screen.
 import 'package:kumo/features/moments/presentation/screens/moment_detail_screen.dart';
 import 'package:kumo/features/moments/presentation/screens/moment_form_screen.dart';
 import 'package:kumo/features/moments/presentation/screens/moments_screen.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// El router vive en un provider para que más adelante pueda leer otros
 /// providers (por ejemplo, el estado de autenticación para redirigir).

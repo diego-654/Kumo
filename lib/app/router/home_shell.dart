@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// Contenedor con la barra de navegación inferior compartida por los tabs.
 class HomeShell extends StatelessWidget {
