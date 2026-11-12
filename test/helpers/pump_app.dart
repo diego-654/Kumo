@@ -16,6 +16,7 @@ extension PumpKumoApp on WidgetTester {
   /// Para empezar con datos, pasa [momentsRepository]. No uses [overrides]
   /// para el repositorio: Riverpod no deja sobrescribir el mismo provider
   /// dos veces en un contenedor (lanza un assert).
+  Future<void> pumpKumoApp({
     MomentsRepository? momentsRepository,
     List<Override> overrides = const [],
   }) => pumpWidget(
