@@ -10,11 +10,11 @@ class SectionTitle extends StatelessWidget {
   Widget build(BuildContext context) {
     return Text(
       text.toUpperCase(),
-      style: const TextStyle(
+      style: TextStyle(
         fontSize: 13,
         fontWeight: FontWeight.w700,
         letterSpacing: 0.6,
-        color: Color(0xFF3C3F4E),
+        color: Theme.of(context).colorScheme.onSurfaceVariant,
       ),
     );
   }

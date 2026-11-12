@@ -1,3 +1,4 @@
+import 'package:kumo/core/theme/emotion_colors.dart';
 import 'package:material_ui/material_ui.dart';
 
 /// Tema Material 3 de Kumo.
@@ -28,9 +29,21 @@ abstract final class AppTheme {
             errorContainer: const Color(0xFFFCEBEB),
           )
         : generated;
+    final isLight = brightness == Brightness.light;
     final inputRadius = BorderRadius.circular(12);
     return ThemeData(
       colorScheme: colorScheme,
+      // Colores propios de Kumo que no caben en ColorScheme.
+      extensions: [if (isLight) EmotionColors.light else EmotionColors.dark],
+      // Fondo de las hojas inferiores. En claro, blanco puro como en los
+      // bocetos; en oscuro, un contenedor un tono más claro que el fondo
+      // para que la hoja "flote" (en oscuro la elevación se ve por luz,
+      // no por sombra).
+      bottomSheetTheme: BottomSheetThemeData(
+        backgroundColor: isLight
+            ? colorScheme.surfaceContainerLowest
+            : colorScheme.surfaceContainerHigh,
+      ),
       appBarTheme: AppBarTheme(
         centerTitle: false,
         backgroundColor: colorScheme.surface,

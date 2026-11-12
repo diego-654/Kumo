@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:kumo/app/router/app_router.dart';
 import 'package:kumo/core/theme/app_theme.dart';
+import 'package:kumo/core/theme/theme_mode_provider.dart';
 import 'package:material_ui/material_ui.dart';
 
 class KumoApp extends ConsumerWidget {
@@ -15,6 +16,7 @@ class KumoApp extends ConsumerWidget {
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light,
       darkTheme: AppTheme.dark,
+      themeMode: ref.watch(themeModeProvider),
       routerConfig: router,
     );
   }

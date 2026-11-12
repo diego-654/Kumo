@@ -1,3 +1,4 @@
+import 'package:kumo/core/theme/emotion_colors.dart';
 import 'package:kumo/features/moments/domain/entities/sentiment.dart';
 import 'package:kumo/features/moments/presentation/extensions/emotion_style.dart';
 import 'package:material_ui/material_ui.dart';
@@ -16,6 +17,7 @@ class EmotionBreakdown extends StatelessWidget {
     final entries = breakdown.entries.where((e) => e.value > 0).toList()
       ..sort((a, b) => b.value.compareTo(a.value));
     if (entries.isEmpty) return const SizedBox.shrink();
+    final emotions = EmotionColors.of(context);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -32,7 +34,7 @@ class EmotionBreakdown extends StatelessWidget {
                 for (final e in entries)
                   Expanded(
                     flex: e.value,
-                    child: ColoredBox(color: e.key.color),
+                    child: ColoredBox(color: emotions.fill(e.key)),
                   ),
               ],
             ),
@@ -74,7 +76,7 @@ class _LegendItem extends StatelessWidget {
           width: 10,
           height: 10,
           decoration: BoxDecoration(
-            color: emotion.color,
+            color: EmotionColors.of(context).fill(emotion),
             shape: BoxShape.circle,
           ),
         ),
@@ -82,7 +84,10 @@ class _LegendItem extends StatelessWidget {
         Expanded(
           child: Text(
             emotion.label,
-            style: const TextStyle(fontSize: 14, color: Color(0xFF3C3F4E)),
+            style: TextStyle(
+              fontSize: 14,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
           ),
         ),
       ],

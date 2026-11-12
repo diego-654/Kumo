@@ -2,9 +2,9 @@ import 'dart:math';
 
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:kumo/core/theme/emotion_colors.dart';
 import 'package:kumo/features/heat_map/domain/entities/emotion_zone.dart';
 import 'package:kumo/features/heat_map/presentation/providers/heat_map_providers.dart';
-import 'package:kumo/features/moments/presentation/extensions/emotion_style.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:material_ui/material_ui.dart';
 
@@ -29,6 +29,7 @@ class EmotionZonesLayer extends ConsumerWidget {
     // la seleccionada no está en este zoom, no se atenúa nada.
     final selected = ref.watch(selectedZoneProvider)?.cell;
     final focus = zones.any((z) => z.cell == selected) ? selected : null;
+    final emotions = EmotionColors.of(context);
 
     final blobs = [
       for (final zone in zones)
@@ -36,6 +37,7 @@ class EmotionZonesLayer extends ConsumerWidget {
           camera,
           zone,
           cellMeters,
+          emotions,
           sqrt(zone.momentCount / maxCount),
           faded: focus != null && zone.cell != focus,
         ),
@@ -52,6 +54,7 @@ class EmotionZonesLayer extends ConsumerWidget {
     MapCamera camera,
     EmotionZone zone,
     double cellMeters,
+    EmotionColors emotions,
     double weight, {
     required bool faded,
   }) {
@@ -66,7 +69,7 @@ class EmotionZonesLayer extends ConsumerWidget {
     return (
       center: offset,
       radius: (offset - edge).distance,
-      color: zone.dominant.color,
+      color: emotions.fill(zone.dominant),
       // Opacidad del centro; al 35 % si otra zona tiene el foco.
       strength: (0.55 + 0.35 * weight) * (faded ? 0.35 : 1),
     );
