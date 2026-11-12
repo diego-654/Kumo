@@ -1,3 +1,4 @@
+import 'package:kumo/core/theme/emotion_colors.dart';
 import 'package:kumo/core/widget/kumo_sheet.dart';
 import 'package:kumo/core/widget/photo_placeholder.dart';
 import 'package:kumo/core/widget/section_title.dart';
@@ -129,11 +130,12 @@ class _DominantBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final emotions = EmotionColors.of(context);
     return Container(
       height: 32,
       padding: const EdgeInsets.symmetric(horizontal: 12),
       decoration: BoxDecoration(
-        color: emotion.color.withValues(alpha: 0.2),
+        color: emotions.fill(emotion).withValues(alpha: 0.2),
         borderRadius: BorderRadius.circular(16),
       ),
       child: Row(
@@ -144,7 +146,7 @@ class _DominantBadge extends StatelessWidget {
             width: 10,
             height: 10,
             decoration: BoxDecoration(
-              color: emotion.color,
+              color: emotions.fill(emotion),
               shape: BoxShape.circle,
             ),
           ),
@@ -153,7 +155,7 @@ class _DominantBadge extends StatelessWidget {
             style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w700,
-              color: emotion.labelColor,
+              color: emotions.label(emotion),
             ),
           ),
         ],
@@ -182,7 +184,7 @@ class _PlaceTile extends StatelessWidget {
     return DecoratedBox(
       decoration: BoxDecoration(
         border: showDivider
-            ? const Border(top: BorderSide(color: Color(0xFFEEF0F5)))
+            ? Border(top: BorderSide(color: colors.outlineVariant))
             : null,
       ),
       child: InkWell(
@@ -197,7 +199,7 @@ class _PlaceTile extends StatelessWidget {
                 child: SizedBox.square(
                   dimension: _thumbSize,
                   child: cover == null
-                      ? const ColoredBox(color: Color(0xFFD5D8E8))
+                      ? ColoredBox(color: colors.surfaceContainerHighest)
                       : Image(
                           image: cover.image,
                           fit: BoxFit.cover,

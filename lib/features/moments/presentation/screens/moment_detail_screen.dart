@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:kumo/app/router/app_routes.dart';
 import 'package:kumo/core/extensions/date_time_extensions.dart';
+import 'package:kumo/core/theme/emotion_colors.dart';
 import 'package:kumo/core/widget/photo_carousel.dart';
 import 'package:kumo/features/moments/domain/entities/moment.dart';
 import 'package:kumo/features/moments/domain/entities/sentiment.dart';
@@ -120,10 +121,12 @@ class _SentimentInfo extends StatelessWidget {
         : 'La IA detectó ${emotion.label} con un '
               '${(sentiment.confidence * 100).round()}% de confianza';
 
+    final emotions = EmotionColors.of(context);
+
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: emotion.color.withValues(alpha: 0.12),
+        color: emotions.fill(emotion).withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(16),
       ),
       child: Row(
@@ -133,14 +136,14 @@ class _SentimentInfo extends StatelessWidget {
             sentiment.correctedByUser
                 ? Icons.edit_note
                 : Icons.auto_awesome_outlined,
-            color: emotion.labelColor,
+            color: emotions.label(emotion),
             size: 20,
           ),
           Expanded(
             child: Text(
               text,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: emotion.labelColor,
+                color: emotions.label(emotion),
                 fontWeight: FontWeight.w600,
               ),
             ),

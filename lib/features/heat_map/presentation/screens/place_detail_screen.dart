@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:kumo/app/router/app_routes.dart';
 import 'package:kumo/core/extensions/date_time_extensions.dart';
+import 'package:kumo/core/theme/emotion_colors.dart';
 import 'package:kumo/core/widget/photo_carousel.dart';
 import 'package:kumo/core/widget/photo_placeholder.dart';
 import 'package:kumo/features/heat_map/presentation/providers/heat_map_providers.dart';
@@ -183,7 +184,7 @@ class _PhotoHeader extends StatelessWidget {
           left: 16,
           top: top + 12,
           child: Material(
-            color: Colors.white,
+            color: Theme.of(context).colorScheme.surface,
             shape: const CircleBorder(),
             elevation: 2,
             child: IconButton(
@@ -216,10 +217,11 @@ class _FeelingCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final fill = EmotionColors.of(context).fill(emotion);
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: emotion.color.withValues(alpha: 0.12),
+        color: fill.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(18),
       ),
       child: Row(
@@ -229,7 +231,7 @@ class _FeelingCard extends StatelessWidget {
             width: 48,
             height: 48,
             decoration: BoxDecoration(
-              color: emotion.color,
+              color: fill,
               shape: BoxShape.circle,
             ),
           ),
@@ -319,9 +321,9 @@ class _MomentRow extends StatelessWidget {
         spacing: 12,
         children: [
           // Aún no hay usuarios: avatar genérico.
-          const CircleAvatar(
+          CircleAvatar(
             radius: 18,
-            backgroundColor: Color(0xFFDDE0FA),
+            backgroundColor: colors.primaryContainer,
           ),
           Expanded(
             child: Column(
@@ -343,10 +345,10 @@ class _MomentRow extends StatelessWidget {
                   moment.note,
                   maxLines: 3,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 15,
                     height: 1.4,
-                    color: Color(0xFF3C3F4E),
+                    color: colors.onSurface,
                   ),
                 ),
               ],

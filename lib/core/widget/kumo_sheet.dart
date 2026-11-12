@@ -7,15 +7,18 @@ class KumoSheetSurface extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return DecoratedBox(
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+      decoration: BoxDecoration(
+        color:
+            theme.bottomSheetTheme.backgroundColor ??
+            theme.colorScheme.surfaceContainerLow,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
         boxShadow: [
           BoxShadow(
-            color: Color(0x1F1B1C24), // 12 % del texto
+            color: theme.colorScheme.shadow.withValues(alpha: 0.12),
             blurRadius: 24,
-            offset: Offset(0, -8),
+            offset: const Offset(0, -8),
           ),
         ],
       ),
@@ -35,7 +38,7 @@ class KumoSheetHandle extends StatelessWidget {
         width: 40,
         height: 5,
         decoration: BoxDecoration(
-          color: const Color(0xFFC9CCDB),
+          color: Theme.of(context).colorScheme.outlineVariant,
           borderRadius: BorderRadius.circular(3),
         ),
       ),
