@@ -24,7 +24,6 @@ class ZoneSummarySheet extends StatelessWidget {
       snapSizes: const [0.3, 0.6],
       builder: (context, scrollController) {
         return KumoSheetSurface(
-          // La barrita va dentro de la lista: así arrastrarla mueve la hoja.
           child: ListView(
             controller: scrollController,
             padding: const EdgeInsets.fromLTRB(20, 0, 20, 28),
@@ -32,7 +31,11 @@ class ZoneSummarySheet extends StatelessWidget {
               const KumoSheetHandle(),
               _header(context),
               const SizedBox(height: 18),
-              const _SectionTitle('Cómo se siente la gente aquí'),
+              _SectionTitle(
+                'Cómo se siente la gente aquí ${zone.moments.map(
+                  (e) => e.note,
+                )}',
+              ),
               const SizedBox(height: 10),
               _emotionBreakdown(context),
               const SizedBox(height: 18),
@@ -59,7 +62,7 @@ class ZoneSummarySheet extends StatelessWidget {
 
   /// Lugares de la zona agrupando zone.moments por placeName, con su
   /// emoción y número de momentos. Al tocar uno irá al detalle del lugar.
-  Widget _topPlaces(BuildContext context) {
+  Widget   _topPlaces(BuildContext context) {
     return const SizedBox.shrink();
   }
 }
